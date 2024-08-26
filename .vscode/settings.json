@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "audio_state.h": "c",
+        "audio_manipulation.h": "c",
+        "tracks.h": "c",
+        "algorithm": "c"
+    }
+}
