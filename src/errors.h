@@ -16,5 +16,6 @@
 #define SoundIoErrorOutputStream                  28
 #define SoundIoErrorLoadingInputDevices           29
 #define SoundIoErrorLoadingOutputDevices          30
+#define SoundIoErrorSettingSampleRate             31
 
 #endif
