@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "csl_types.h"
 #include "track.h"
+#include "csoundlib.h"
 
 typedef struct _audioState {
     struct SoundIo* soundio;
@@ -38,7 +39,5 @@ typedef struct _audioState {
 } audio_state;
 
 extern audio_state* csoundlib_state;
-
-float lib_getCurrentRmsOutput(void);
 
 #endif

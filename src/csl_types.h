@@ -1,7 +1,7 @@
 #ifndef CSL_TYPES_H
 #define CSL_TYPES_H
 
-#include <soundio/soundio.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 

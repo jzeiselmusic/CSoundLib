@@ -36,7 +36,6 @@ typedef struct _trackObj {
     inputBuffer input_buffer;
 } trackObject;
 
-int lib_trackChooseInputDevice(int trackId, int device_index);
-int lib_trackChooseInputChannel(int trackId, int channel_index);
+#include "csoundlib.h"
 
 #endif

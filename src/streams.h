@@ -6,12 +6,6 @@
 #define DEFAULT_BUFFER_SIZE                       64
 #define MAX_BUFFER_SIZE_BYTES                     8192
 
-int lib_createAndStartInputStream(int deviceIndex, float microphone_latency);
-
-int lib_stopInputStream();
-
-int lib_createAndStartOutputStream(int deviceIndex, float microphone_latency);
-
-int lib_stopOutputStream();
+#include "csoundlib.h"
 
 #endif
