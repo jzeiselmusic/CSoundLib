@@ -8,15 +8,17 @@
 #include "csl_types.h"
 #include "csl_util.h"
 #include "streams.h"
-#include "callbacks.h"
 #include "init.h"
 #include "state.h"
 #include "errors.h"
+
+extern audio_state* csoundlib_state;
 
 int lib_loadInputDevices() {
     soundio_flush_events(csoundlib_state->soundio);
     int num_input_devices = lib_getNumInputDevices();
     int default_input_device_index = lib_getDefaultInputDeviceIndex();
+    csoundlib_state->track->input_device_index = default_input_device_index;
     if (num_input_devices > 0) {
         struct SoundIoDevice** input_devices = malloc(num_input_devices * sizeof( struct SoundIoDevice*) );
         if (!input_devices) {
@@ -110,7 +112,6 @@ char* lib_getNameOfChannelOfInputDevice(int deviceIndex, int channelIndex) {
 
 int lib_loadOutputDevices() {
     soundio_flush_events(csoundlib_state->soundio);
-    // logCallback("loading all output devices");
     int num_output_devices = lib_getNumOutputDevices();
     if (num_output_devices > 0) {
         struct SoundIoDevice** output_devices = malloc(num_output_devices * sizeof( struct SoundIoDevice*) );

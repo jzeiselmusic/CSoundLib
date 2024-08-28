@@ -4,13 +4,14 @@
 #include "streams.h"
 #include "track.h"
 #include "devices.h"
-#include "callbacks.h"
 #include <stdlib.h>
 #include "state.h"
 #include <string.h>
 #include "wav.h"
-
+#include "csoundlib.h"
 #include <CoreAudio/CoreAudio.h>
+
+extern audio_state* csoundlib_state;
 
 static int _connectToBackend();
 static void _deallocateAllMemory();
@@ -26,7 +27,6 @@ static int _connectToBackend() {
 }
 
 static void _deallocateAllMemory() {
-    logCallback("deallocating memory");
     if (csoundlib_state->input_memory_allocated) {
         free(csoundlib_state->input_channel_buffers);
         free(csoundlib_state->input_devices);
@@ -44,16 +44,18 @@ int lib_startSession(int sample_rate, int bit_depth) {
         return SoundIoErrorSettingSampleRate;
     }
     csoundlib_state->sample_rate = sample_rate;
-    /* set PC sample rate */
-    _setGlobalInputSampleRate(sample_rate);
-    
+
+    // _setGlobalInputSampleRate(sample_rate);
+
     switch(bit_depth) {
         case 8: csoundlib_state->input_dtype = CSL_S8_t; break;
         case 16: csoundlib_state->input_dtype = CSL_S16_t; break;
         case 24: csoundlib_state->input_dtype = CSL_S24_t; break;
         case 32: csoundlib_state->input_dtype = CSL_S32_t; break;
     } 
+
     struct SoundIo* soundio = soundio_create();
+    
     char* mixed_output_buffer = calloc(MAX_BUFFER_SIZE_BYTES, sizeof(char));
     trackObject* track = malloc(1 * sizeof(trackObject));
 
@@ -62,7 +64,7 @@ int lib_startSession(int sample_rate, int bit_depth) {
             .volume = 1.0,
             .record_enabled = false,
             .is_recording = false,
-            .input_device_index = lib_getDefaultInputDeviceIndex(),
+            .input_device_index = 0,
             .input_channel_index = 0,
             .current_rms_levels = {0.0, 0.0},
             .input_buffer.buffer = {0},
@@ -91,7 +93,7 @@ int lib_startSession(int sample_rate, int bit_depth) {
     }
     else {
         return SoundIoErrorNoMem;
-    }
+    } 
 }
 
 int lib_destroySession() {
@@ -129,11 +131,9 @@ int lib_getCurrentBackend() {
 
 int _checkEnvironmentAndBackendConnected() {
     if (!csoundlib_state->environment_initialized) {
-        logCallback("uh oh. environment not initialized");
         return SoundIoErrorEnvironmentNotInitialized;
     }
     if (!csoundlib_state->backend_connected) {
-        logCallback("uh oh. backend not connected");
         return SoundIoErrorBackendDisconnected;
     }
     return SoundIoErrorNone;

@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "csl_types.h"
-#include "callbacks.h"
 #include "state.h"
+
+extern audio_state* csoundlib_state;
 
 /*
 

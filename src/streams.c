@@ -1,11 +1,9 @@
-
 #include "csl_types.h"
 #include "streams.h"
 #include <stdbool.h>
 #include "devices.h"
 #include "stdint.h"
 #include "csl_util.h"
-#include "callbacks.h"
 #include "init.h"
 #include "state.h"
 #include "wav.h"
@@ -19,32 +17,17 @@ static int _createOutputStream(int device_index, float microphone_latency);
 static void _processInputStreams(int* max_fill_samples, struct SoundIoRingBuffer* ring_buffer);
 static void _copyInputBuffersToOutputBuffers();
 
-__attribute__ ((cold))
-__attribute__ ((noreturn))
-__attribute__ ((format (printf, 1, 2)))
-static void _panic(const char *format, ...) {
-    panicCallback(format);
-    abort();
-}
+extern audio_state* csoundlib_state;
 
-__attribute__ ((cold))
-__attribute__ ((format (printf, 1, 2)))
-static void _formatPanic(const char *format, ...) {
-    panicCallback(format);
-}
 
 static void _underflowCallback(struct SoundIoOutStream *outstream) {
     static int count = 0;
-    logCallback("underflow reported");
 }
 
 static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame_count_min, int frame_count_max) {
     /* gets called repeatedly every time audio data is available to be read on this particular input device */
-
     /* every input stream started gets a read callback associated with it that gets repeatedly called */
-
     /* when a device sends data, it interleaves the data based on how many channels there are */
-
     int device_index = -1;
     while(csoundlib_state->input_stream_written == true) {
         /* wait until output is done to start reading again */
@@ -57,26 +40,17 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
         }
     }
     if (device_index == -1) {
-        _panic("error finding input device");
-    }
-
-    if (csoundlib_state->output_stream_initialized == false) {
-        _panic("output device not initialized");
         return;
     }
-
+    if (csoundlib_state->output_stream_initialized == false) {
+        return;
+    }
     /* all should be the same */
     struct SoundIoRingBuffer* ring_buffer = csoundlib_state->input_channel_buffers[0];
     /* get the write ptr for this inputs ring buffer */
     int bytes_count = soundio_ring_buffer_free_count(ring_buffer);
     int frame_count = bytes_count / BYTES_PER_FRAME_MONO; 
-
-    if (frame_count_min > frame_count) {
-        _panic("ring buffer writer overtook reader");
-    }
-
     int write_frames = min_int(frame_count, frame_count_max);
-
     int frames_left = write_frames;
 
     struct SoundIoChannelArea *areas;
@@ -85,7 +59,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
     for (;;) {
         int frame_count = frames_left;
         if ((err = soundio_instream_begin_read(instream, &areas, &frame_count))) {
-            _panic("begin read error: %s", soundio_strerror(err));
+            return;
         }
         if (!frame_count) {
             break;
@@ -93,7 +67,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
         if (!areas) {
             /* Due to an overflow there is a hole. Fill the ring buffer with
                silence for the size of the hole.  */
-            _formatPanic("Dropped %d frames due to internal overflow\n", frame_count);
+            return;
         } 
         else {
             for (int frame = 0; frame < frame_count; frame ++) {
@@ -108,7 +82,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
             }
         }
         if ((err = soundio_instream_end_read(instream))) {
-            _panic("end read error: %s\n", soundio_strerror(err));
+            return;
         }
 
         frames_left -= frame_count;
@@ -140,11 +114,9 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
         }
     }
     if (device_index == -1) {
-        _panic("error finding output device");
         return;
     }
     if (csoundlib_state->output_stream_initialized == false) {
-        _panic("output device not initialized");
         return;
     }
 
@@ -175,10 +147,9 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     while (frames_left > 0) {
         int frame_count = frames_left;
         if ((err = soundio_outstream_begin_write(outstream, &areas, &frame_count)))
-            _panic("begin write error: %s", soundio_strerror(err));
+            return;
         if (frame_count <= 0)
             break;
-
         for (int frame = 0; frame < frame_count; frame += 1) {
             for (int ch = 0; ch < outstream->layout.channel_count; ch += 1) {
                 memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
@@ -186,9 +157,9 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
             }
             mixed_read_ptr += outstream->bytes_per_sample;
         }
-        if ((err = soundio_outstream_end_write(outstream)))
-            _panic("end write error: %s", soundio_strerror(err));
-
+        if ((err = soundio_outstream_end_write(outstream))) {
+            return;
+        }
         frames_left -= frame_count;
     }
     csoundlib_state->input_stream_written = false;
@@ -314,7 +285,6 @@ int lib_stopOutputStream() {
         soundio_outstream_pause(csoundlib_state->output_stream, true);
         soundio_outstream_destroy(csoundlib_state->output_stream);
     }
-    logCallback("returning true");
     return SoundIoErrorNone;
 }
 

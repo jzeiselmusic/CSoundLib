@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include "callbacks.h"
 #include "csl_util.h"
 #include "streams.h"
 #include <fcntl.h>
