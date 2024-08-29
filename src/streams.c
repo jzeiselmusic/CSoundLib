@@ -14,7 +14,7 @@
 
 static int _createInputStream(int device_index, float microphone_latency);
 static int _createOutputStream(int device_index, float microphone_latency);
-static void _processInputStreams(int* max_fill_samples, struct SoundIoRingBuffer* ring_buffer);
+static void _processInputStreams(int* max_fill_samples);
 static void _copyInputBuffersToOutputBuffers();
 
 extern audio_state* csoundlib_state;
@@ -40,6 +40,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
         }
     }
     if (device_index == -1) {
+        printf("could not find input device \n");
         return;
     }
     if (csoundlib_state->output_stream_initialized == false) {
@@ -59,6 +60,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
     for (;;) {
         int frame_count = frames_left;
         if ((err = soundio_instream_begin_read(instream, &areas, &frame_count))) {
+            printf("instream begin read error \n");
             return;
         }
         if (!frame_count) {
@@ -67,6 +69,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
         if (!areas) {
             /* Due to an overflow there is a hole. Fill the ring buffer with
                silence for the size of the hole.  */
+            printf("empty audio stream \n");
             return;
         } 
         else {
@@ -82,6 +85,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
             }
         }
         if ((err = soundio_instream_end_read(instream))) {
+            printf("instream end read error \n");
             return;
         }
 
@@ -102,7 +106,6 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     int frame_count;
     int err;
     struct SoundIoChannelArea *areas;
-    struct SoundIoRingBuffer* ring_buffer;
     int max_fill_samples = 0;
 
     /* search for device index of this output stream */
@@ -114,6 +117,7 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
         }
     }
     if (device_index == -1) {
+        printf("could not find output device\n");
         return;
     }
     if (csoundlib_state->output_stream_initialized == false) {
@@ -126,9 +130,10 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     memset(csoundlib_state->mixed_output_buffer, 0, MAX_BUFFER_SIZE_BYTES);
 
     /* clear track input buffers*/
+    memset(csoundlib_state->track->input_buffer.buffer, 0, MAX_BUFFER_SIZE_BYTES);
 
     /* put input streams into track input buffers */
-    _processInputStreams(&max_fill_samples, ring_buffer);
+    _processInputStreams(&max_fill_samples);
 
     /* now copy input buffer to output scaled by volume */
     /* note: THIS IS WHERE VOLUME SCALING HAPPENS */
@@ -146,8 +151,10 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     char* mixed_read_ptr = csoundlib_state->mixed_output_buffer;
     while (frames_left > 0) {
         int frame_count = frames_left;
-        if ((err = soundio_outstream_begin_write(outstream, &areas, &frame_count)))
+        if ((err = soundio_outstream_begin_write(outstream, &areas, &frame_count))) {
+            printf("outstream begin write error \n");
             return;
+        }
         if (frame_count <= 0)
             break;
         for (int frame = 0; frame < frame_count; frame += 1) {
@@ -155,9 +162,10 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
                 memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
                 areas[ch].ptr += areas[ch].step;
             }
-            mixed_read_ptr += outstream->bytes_per_sample;
+            mixed_read_ptr += outstream->bytes_per_frame;
         }
         if ((err = soundio_outstream_end_write(outstream))) {
+            printf("outstream end write error \n");
             return;
         }
         frames_left -= frame_count;
@@ -258,7 +266,7 @@ static int _createOutputStream(int device_index, float microphone_latency) {
     outstream->underflow_callback = _underflowCallback;
 
     csoundlib_state->output_stream = outstream;
-
+    csoundlib_state->track->input_enabled = true;
     err = soundio_outstream_open(outstream);
     if (err != SoundIoErrorNone) return SoundIoErrorOutputStream;
     csoundlib_state->output_stream_initialized = true;
@@ -288,10 +296,11 @@ int lib_stopOutputStream() {
     return SoundIoErrorNone;
 }
 
-static void _processInputStreams(int* max_fill_samples, struct SoundIoRingBuffer* ring_buffer) {
+static void _processInputStreams(int* max_fill_samples) {
     /* copy each input stream into each track input buffer */
     for (int channel = 0; channel < csoundlib_state->num_channels_available; channel++) {
-        if (csoundlib_state->input_stream_started == true) {
+        if (csoundlib_state->input_stream_started) {
+            struct SoundIoRingBuffer* ring_buffer;
             ring_buffer = csoundlib_state->input_channel_buffers[channel];
             char *read_ptr = soundio_ring_buffer_read_ptr(ring_buffer);
             /* number of bytes available for reading */
@@ -330,7 +339,7 @@ static void _copyInputBuffersToOutputBuffers() {
     add_and_scale_audio(
         (uint8_t*)(track_p->input_buffer.buffer),
         (uint8_t*)(csoundlib_state->mixed_output_buffer),
-        track_p->volume,
+        1.0,
         track_p->input_buffer.write_bytes / csoundlib_state->input_dtype.bytes_in_buffer
     );
 
