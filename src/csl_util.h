@@ -13,9 +13,9 @@ void add_and_scale_audio(const uint8_t *source, uint8_t *destination, float volu
 
 void scale_audio(uint8_t *source, float volume, int num_samples);
 
-float calculate_rms_level(const char* source, int num_bytes);
+float calculate_rms_level(const unsigned char* source, int num_bytes);
 
-float four_bytes_to_sample(const char* bytes);
+float four_bytes_to_sample(const unsigned char* bytes);
 
 float log_to_mag(float log);
 

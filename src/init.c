@@ -39,6 +39,7 @@ static void _deallocateAllMemory() {
 }
 
 int lib_startSession(int sample_rate, int bit_depth) {
+    int err;
     csoundlib_state = malloc( sizeof(audio_state) );
 
     if (sample_rate != 44100 && sample_rate != 48000) {
@@ -46,9 +47,12 @@ int lib_startSession(int sample_rate, int bit_depth) {
     }
     csoundlib_state->sample_rate = sample_rate;
 
-    _setGlobalInputSampleRate(sample_rate);
-
-    _setGlobalOutputSampleRate(sample_rate);
+    if ((err = _setGlobalInputSampleRate(sample_rate)) != SoundIoErrorNone) {
+        return err;
+    }
+    if ((err = _setGlobalOutputSampleRate(sample_rate)) != SoundIoErrorNone) {
+        return err;
+    }
 
     switch(bit_depth) {
         case 8: csoundlib_state->input_dtype = CSL_S8_t; break;
@@ -59,7 +63,7 @@ int lib_startSession(int sample_rate, int bit_depth) {
 
     struct SoundIo* soundio = soundio_create();
     
-    char* mixed_output_buffer = calloc(MAX_BUFFER_SIZE_BYTES, sizeof(char));
+    unsigned char* mixed_output_buffer = (unsigned char*)calloc(MAX_BUFFER_SIZE_BYTES, sizeof(char));
     trackObject* track = malloc(1 * sizeof(trackObject));
     *track = (trackObject)
         {
@@ -72,12 +76,15 @@ int lib_startSession(int sample_rate, int bit_depth) {
             .input_buffer.buffer = {0},
             .input_buffer.write_bytes = 0
         };
+    EffectPointer* e_list = malloc(50 * sizeof(EffectPointer));
 
-    if (soundio && mixed_output_buffer && track && csoundlib_state) {
+    if (soundio && mixed_output_buffer && track && csoundlib_state && e_list) {
         csoundlib_state->soundio = soundio;
         csoundlib_state->mixed_output_buffer = mixed_output_buffer;
         csoundlib_state->environment_initialized = true;
         csoundlib_state->track = track;
+        csoundlib_state->effect_list = e_list;
+        csoundlib_state->num_effects = 0;
         int backend_err = _connectToBackend();
         int input_dev_err = lib_loadInputDevices();
         int output_dev_err = lib_loadOutputDevices();

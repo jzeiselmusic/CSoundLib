@@ -141,7 +141,7 @@ void scale_audio(uint8_t *source, float volume, int num_samples) {
     }
 }
 
-float calculate_rms_level(const char* source, int num_bytes) {
+float calculate_rms_level(const unsigned char* source, int num_bytes) {
     float rms = 0.0;
     int bytes_in_buffer = csoundlib_state->input_dtype.bytes_in_buffer;
     for (int idx = 0; idx < num_bytes; idx += bytes_in_buffer) {
@@ -151,7 +151,7 @@ float calculate_rms_level(const char* source, int num_bytes) {
     return sqrt(rms / (float)num_bytes);
 }
 
-float four_bytes_to_sample(const char* bytes) {
+float four_bytes_to_sample(const unsigned char* bytes) {
     int sample_value = (int32_t)
             (
                 (bytes[3] << 24) | 

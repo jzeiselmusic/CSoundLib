@@ -24,6 +24,9 @@
 #define SoundIoErrorLoadingOutputDevices          30
 #define SoundIoErrorSettingSampleRate             31
 
+/* function pointers */
+typedef void (*EffectPointer) (unsigned char *buffer, size_t length);
+
 /* init.h */
 int lib_startSession(int sample_rate, int bit_depth);
 int lib_destroySession();
@@ -36,8 +39,6 @@ int lib_stopOutputStream();
 int lib_trackChooseInputDevice(int trackId, int device_index);
 int lib_trackChooseInputChannel(int trackId, int channel_index);
 float lib_getCurrentRmsOutput(void);
-
-/* devices.h */
 
 /* functions for input devices */
 int lib_loadInputDevices();
@@ -58,5 +59,9 @@ char* lib_getOutputDeviceName(int index);
 char* lib_getOutputDeviceId(int index);
 int lib_getNumChannelsOfOutputDevice(int index);
 char* lib_getNameOfChannelOfOutputDevice(int deviceIndex, int channelIndex);
+
+/* functions for managing audio streams */
+void lib_setVolume(float volume);
+void lib_registerEffect(EffectPointer effect);
 
 #endif

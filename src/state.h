@@ -32,9 +32,12 @@ typedef struct _audioState {
     bool output_stream_initialized;
 
     /* mixed inputs */
-    char* mixed_output_buffer; // every channel of data that is enabled gets mixed into output buffer
+    unsigned char* mixed_output_buffer; // every channel of data that is enabled gets mixed into output buffer
     float current_rms_ouput;
 
+    /* effects */
+    EffectPointer* effect_list;
+    size_t num_effects;
 } audio_state;
 
 #endif

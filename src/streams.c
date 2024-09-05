@@ -16,6 +16,7 @@ static int _createInputStream(int device_index, float microphone_latency);
 static int _createOutputStream(int device_index, float microphone_latency);
 static void _processInputStreams(int* max_fill_samples);
 static void _copyInputBuffersToOutputBuffers();
+static void _processAudioEffects();
 
 extern audio_state* csoundlib_state;
 
@@ -135,6 +136,8 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     /* put input streams into track input buffers */
     _processInputStreams(&max_fill_samples);
 
+    _processAudioEffects();
+
     /* now copy input buffer to output scaled by volume */
     /* note: THIS IS WHERE VOLUME SCALING HAPPENS */
     _copyInputBuffersToOutputBuffers();
@@ -148,7 +151,7 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     if (read_count_samples == 0) read_count_samples = frame_count_min;
     /* there is data to be read to output */
     frames_left = read_count_samples;
-    char* mixed_read_ptr = csoundlib_state->mixed_output_buffer;
+    unsigned char* mixed_read_ptr = csoundlib_state->mixed_output_buffer;
     while (frames_left > 0) {
         int frame_count = frames_left;
         if ((err = soundio_outstream_begin_write(outstream, &areas, &frame_count))) {
@@ -162,7 +165,7 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
                 memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
                 areas[ch].ptr += areas[ch].step;
             }
-            mixed_read_ptr += outstream->bytes_per_frame;
+            mixed_read_ptr += outstream->bytes_per_sample;
         }
         if ((err = soundio_outstream_end_write(outstream))) {
             printf("outstream end write error \n");
@@ -302,7 +305,7 @@ static void _processInputStreams(int* max_fill_samples) {
         if (csoundlib_state->input_stream_started) {
             struct SoundIoRingBuffer* ring_buffer;
             ring_buffer = csoundlib_state->input_channel_buffers[channel];
-            char *read_ptr = soundio_ring_buffer_read_ptr(ring_buffer);
+            unsigned char *read_ptr = (unsigned char*)soundio_ring_buffer_read_ptr(ring_buffer);
             /* number of bytes available for reading */
             int fill_bytes = soundio_ring_buffer_fill_count(ring_buffer);
             int fill_samples = fill_bytes / BYTES_PER_FRAME_MONO;
@@ -339,7 +342,7 @@ static void _copyInputBuffersToOutputBuffers() {
     add_and_scale_audio(
         (uint8_t*)(track_p->input_buffer.buffer),
         (uint8_t*)(csoundlib_state->mixed_output_buffer),
-        1.0,
+        csoundlib_state->track->volume,
         track_p->input_buffer.write_bytes / csoundlib_state->input_dtype.bytes_in_buffer
     );
 
@@ -347,4 +350,13 @@ static void _copyInputBuffersToOutputBuffers() {
             calculate_rms_level(
                 track_p->input_buffer.buffer,
                 track_p->input_buffer.write_bytes) * track_p->volume;
+}
+
+static void _processAudioEffects() {
+    for (int i = 0; i < csoundlib_state->num_effects; i++) {
+        csoundlib_state->effect_list[i](
+            csoundlib_state->track->input_buffer.buffer, 
+            csoundlib_state->track->input_buffer.write_bytes
+        );
+    }
 }

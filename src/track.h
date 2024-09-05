@@ -7,7 +7,7 @@
 #include "streams.h"
 
 typedef struct _inputBuffer {
-    char buffer[MAX_BUFFER_SIZE_BYTES];
+    unsigned char buffer[MAX_BUFFER_SIZE_BYTES];
     size_t write_bytes;
 } inputBuffer;
 
