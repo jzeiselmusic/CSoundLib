@@ -1,6 +1,10 @@
 #ifndef CSOUNDLIB_H
 #define CSOUNDLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif 
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <soundio/soundio.h>
@@ -43,7 +47,7 @@ typedef enum {
 typedef void (*EffectPointer) (unsigned char *buffer, size_t length, CSL_DTYPE data_type, size_t num_channels);
 
 /* init.h */
-int lib_startSession(int sample_rate, int bit_depth);
+int lib_startSession(int sample_rate, CSL_DTYPE data_type);
 int lib_destroySession();
 int lib_getCurrentBackend();
 
@@ -78,5 +82,9 @@ char* lib_getNameOfChannelOfOutputDevice(int deviceIndex, int channelIndex);
 /* functions for managing audio streams */
 void lib_setVolume(float volume);
 void lib_registerEffect(EffectPointer effect);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

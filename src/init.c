@@ -38,7 +38,7 @@ static void _deallocateAllMemory() {
     free(csoundlib_state);
 }
 
-int lib_startSession(int sample_rate, int bit_depth) {
+int lib_startSession(int sample_rate, CSL_DTYPE data_type) {
     int err;
     csoundlib_state = malloc( sizeof(audio_state) );
 
@@ -54,11 +54,11 @@ int lib_startSession(int sample_rate, int bit_depth) {
         return err;
     }
 
-    switch(bit_depth) {
-        case 8: csoundlib_state->input_dtype = CSL_S8_t; break;
-        case 16: csoundlib_state->input_dtype = CSL_S16_t; break;
-        case 24: csoundlib_state->input_dtype = CSL_S24_t; break;
-        case 32: csoundlib_state->input_dtype = CSL_S32_t; break;
+    switch(data_type) {
+        case CSL_S8: csoundlib_state->input_dtype = CSL_S8_t; break;
+        case CSL_S16: csoundlib_state->input_dtype = CSL_S16_t; break;
+        case CSL_S24: csoundlib_state->input_dtype = CSL_S24_t; break;
+        case CSL_S32: csoundlib_state->input_dtype = CSL_S32_t; break;
     } 
 
     struct SoundIo* soundio = soundio_create();
