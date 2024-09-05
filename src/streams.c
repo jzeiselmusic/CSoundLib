@@ -356,7 +356,9 @@ static void _processAudioEffects() {
     for (int i = 0; i < csoundlib_state->num_effects; i++) {
         csoundlib_state->effect_list[i](
             csoundlib_state->track->input_buffer.buffer, 
-            csoundlib_state->track->input_buffer.write_bytes
+            csoundlib_state->track->input_buffer.write_bytes,
+            csoundlib_state->input_dtype.dtype,
+            csoundlib_state->num_channels_available
         );
     }
 }

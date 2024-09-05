@@ -24,8 +24,23 @@
 #define SoundIoErrorLoadingOutputDevices          30
 #define SoundIoErrorSettingSampleRate             31
 
+/* data types */
+
+typedef enum {
+    CSL_U8,   
+    CSL_S8,                     
+    CSL_U16,
+    CSL_U32,
+    CSL_S16,
+    CSL_S32,
+    CSL_U24,
+    CSL_S24,
+    CSL_FL32,
+    CSL_FL64,
+} CSL_DTYPE;
+
 /* function pointers */
-typedef void (*EffectPointer) (unsigned char *buffer, size_t length);
+typedef void (*EffectPointer) (unsigned char *buffer, size_t length, CSL_DTYPE data_type, size_t num_channels);
 
 /* init.h */
 int lib_startSession(int sample_rate, int bit_depth);

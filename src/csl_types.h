@@ -4,19 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-typedef enum {
-    CSL_U8,   
-    CSL_S8,                     
-    CSL_U16,
-    CSL_U32,
-    CSL_S16,
-    CSL_S32,
-    CSL_U24,
-    CSL_S24,
-    CSL_FL32,
-    CSL_FL64,
-} CSL_DTYPE;
+#include "csoundlib.h"
 
 typedef struct _inputDtype {
     CSL_DTYPE dtype;
