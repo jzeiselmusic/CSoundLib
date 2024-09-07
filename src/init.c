@@ -15,8 +15,8 @@ extern audio_state* csoundlib_state;
 
 static int _connectToBackend();
 static void _deallocateAllMemory();
-static int _setGlobalInputSampleRate(float sample_rate);
-static int _setGlobalOutputSampleRate(float sample_rate);
+static int _setGlobalInputSampleRate(CSL_SR sample_rate);
+static int _setGlobalOutputSampleRate(CSL_SR sample_rate);
 
 static int _connectToBackend() {
     int ret = soundio_connect(csoundlib_state->soundio);
@@ -38,13 +38,10 @@ static void _deallocateAllMemory() {
     free(csoundlib_state);
 }
 
-int lib_startSession(int sample_rate, CSL_DTYPE data_type) {
+int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
     int err;
     csoundlib_state = malloc( sizeof(audio_state) );
 
-    if (sample_rate != 44100 && sample_rate != 48000) {
-        return SoundIoErrorSettingSampleRate;
-    }
     csoundlib_state->sample_rate = sample_rate;
 
     if ((err = _setGlobalInputSampleRate(sample_rate)) != SoundIoErrorNone) {
@@ -148,7 +145,7 @@ int _checkEnvironmentAndBackendConnected() {
     return SoundIoErrorNone;
 }
 
-static int _setGlobalInputSampleRate(float sample_rate) {
+static int _setGlobalInputSampleRate(CSL_SR sample_rate) {
     AudioObjectPropertyAddress property = {
         kAudioHardwarePropertyDefaultInputDevice,
         kAudioObjectPropertyScopeGlobal,
@@ -157,7 +154,7 @@ static int _setGlobalInputSampleRate(float sample_rate) {
     
     AudioDeviceID deviceID;
     UInt32 size = sizeof(deviceID);
-    Float64 desiredSampleRate = (Float64)sample_rate;
+    Float64 desiredSampleRate = (Float64)get_sample_rate(sample_rate);
     OSStatus status = AudioObjectGetPropertyData(kAudioObjectSystemObject, &property, 0, NULL, &size, &deviceID);
     if (status != noErr) return SoundIoErrorSettingSampleRate;
 
@@ -177,7 +174,7 @@ static int _setGlobalInputSampleRate(float sample_rate) {
     return SoundIoErrorNone;
 }
 
-static int _setGlobalOutputSampleRate(float sample_rate) {
+static int _setGlobalOutputSampleRate(CSL_SR sample_rate) {
     AudioObjectPropertyAddress property = {
         kAudioHardwarePropertyDefaultOutputDevice,
         kAudioObjectPropertyScopeGlobal,
@@ -186,7 +183,7 @@ static int _setGlobalOutputSampleRate(float sample_rate) {
     
     AudioDeviceID deviceID;
     UInt32 size = sizeof(deviceID);
-    Float64 desiredSampleRate = (Float64)sample_rate;
+    Float64 desiredSampleRate = (Float64)get_sample_rate(sample_rate);
     OSStatus status = AudioObjectGetPropertyData(kAudioObjectSystemObject, &property, 0, NULL, &size, &deviceID);
     if (status != noErr) return SoundIoErrorSettingSampleRate;
 

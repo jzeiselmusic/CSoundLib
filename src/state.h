@@ -7,7 +7,7 @@
 
 typedef struct _audioState {
     struct SoundIo* soundio;
-    int sample_rate; 
+    CSL_SR sample_rate; 
     InputDtype input_dtype;
     trackObject* track;
 

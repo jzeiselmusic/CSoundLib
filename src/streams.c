@@ -190,7 +190,7 @@ static int _createInputStream(int device_index, float microphone_latency) {
         case CSL_S32: instream->format = SoundIoFormatS32LE; break;
         case CSL_S8: instream->format = SoundIoFormatS8; break;
     }
-    instream->sample_rate = csoundlib_state->sample_rate;
+    instream->sample_rate = get_sample_rate(csoundlib_state->sample_rate);
 
     /* use whatever the default channel layout is (take all the channels available) */
     /* data should come in interleaved based on how many channels are sending data */
@@ -262,7 +262,7 @@ static int _createOutputStream(int device_index, float microphone_latency) {
         case CSL_S32: outstream->format = SoundIoFormatS32LE; break;
         case CSL_S8: outstream->format = SoundIoFormatS8; break;
     }
-    outstream->sample_rate = csoundlib_state->sample_rate;
+    outstream->sample_rate = get_sample_rate(csoundlib_state->sample_rate);
     outstream->layout = output_device->current_layout;
     outstream->software_latency = microphone_latency;
     outstream->write_callback = _outputStreamWriteCallback;
@@ -358,6 +358,7 @@ static void _processAudioEffects() {
             csoundlib_state->track->input_buffer.buffer, 
             csoundlib_state->track->input_buffer.write_bytes,
             csoundlib_state->input_dtype.dtype,
+            csoundlib_state->sample_rate,
             csoundlib_state->num_channels_available
         );
     }

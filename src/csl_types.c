@@ -166,3 +166,10 @@ bool is_signed_type(CSL_DTYPE in) {
         default: return 0;
     }
 }
+
+int get_sample_rate(CSL_SR in) {
+    switch(in) {
+        case SR44100: return 44100; break;
+        case SR48000: return 48000; break;
+    }
+}

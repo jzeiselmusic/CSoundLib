@@ -51,6 +51,7 @@ uint8_t get_bit_depth(CSL_DTYPE in);
 int32_t get_max_value(CSL_DTYPE in);
 int32_t get_min_value(CSL_DTYPE in);
 bool is_signed_type(CSL_DTYPE in);
+int get_sample_rate(CSL_SR in);
 
 InputDtype CSL_U8_t;
 InputDtype CSL_S8_t;

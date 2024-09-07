@@ -43,11 +43,16 @@ typedef enum {
     CSL_FL64,
 } CSL_DTYPE;
 
+typedef enum {
+    SR44100,
+    SR48000
+} CSL_SR;
+
 /* function pointers */
-typedef void (*EffectPointer) (unsigned char *buffer, size_t length, CSL_DTYPE data_type, size_t num_channels);
+typedef void (*EffectPointer) (unsigned char *buffer, size_t length, CSL_DTYPE data_type, CSL_SR sample_rate, size_t num_channels);
 
 /* init.h */
-int lib_startSession(int sample_rate, CSL_DTYPE data_type);
+int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type);
 int lib_destroySession();
 int lib_getCurrentBackend();
 
