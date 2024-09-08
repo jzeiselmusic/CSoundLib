@@ -63,19 +63,6 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
     unsigned char* mixed_output_buffer = (unsigned char*)calloc(MAX_BUFFER_SIZE_BYTES, sizeof(char));
     ht* hash_table = ht_create();
 
-    /* *track = (trackObject)
-        {
-            .volume = 1.0,
-            .record_enabled = false,
-            .is_recording = false,
-            .input_device_index = 0,
-            .input_channel_index = 0,
-            .current_rms_levels = {0.0, 0.0},
-            .input_buffer.buffer = {0},
-            .input_buffer.write_bytes = 0
-        };
-    */
-
     if (soundio && mixed_output_buffer && csoundlib_state) {
         csoundlib_state->soundio = soundio;
         csoundlib_state->mixed_output_buffer = mixed_output_buffer;

@@ -1,13 +1,5 @@
 #include "wav.h"
-#include "errors.h"
-#include "state.h"
-#include <string.h>
 #include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include "csl_util.h"
-#include "streams.h"
-#include <fcntl.h>
 
 typedef struct _writeArgs {
     FILE* fp;
