@@ -51,6 +51,12 @@ typedef enum {
 /* function pointers */
 typedef void (*EffectPointer) (unsigned char *buffer, size_t length, CSL_DTYPE data_type, CSL_SR sample_rate, size_t num_channels);
 
+/* describes input or output devices to the user */
+typedef struct {
+    char* name;
+    int index;
+} DeviceInfo;
+
 /* init.h */
 int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type);
 int lib_destroySession();
@@ -75,27 +81,23 @@ int lib_createAndStartInputStream(int deviceIndex, float microphone_latency);
 int lib_stopInputStream();
 int lib_createAndStartOutputStream(int deviceIndex, float microphone_latency);
 int lib_stopOutputStream();
-float lib_getCurrentRmsOutput(void);
+float lib_getCurrentRmsOutput();
 
 /* functions for input devices */
 int lib_loadInputDevices();
 int lib_getDefaultInputDeviceIndex();
 int lib_getNumInputDevices();
-char* lib_getDefaultInputDeviceName();
 char* lib_getInputDeviceName(int index);
-char* lib_getInputDeviceId(int index);
 int lib_getNumChannelsOfInputDevice(int index);
-char* lib_getNameOfChannelOfInputDevice(int deviceIndex, int channelIndex);
+void lib_getAvailableInputDevices(DeviceInfo* in_buffer);
 
 /* functions for output devices */
 int lib_loadOutputDevices();
 int lib_getDefaultOutputDeviceIndex();
 int lib_getNumOutputDevices();
-char* lib_getDefaultOutputDeviceName();
 char* lib_getOutputDeviceName(int index);
-char* lib_getOutputDeviceId(int index);
 int lib_getNumChannelsOfOutputDevice(int index);
-char* lib_getNameOfChannelOfOutputDevice(int deviceIndex, int channelIndex);
+void lib_getAvailableOutputDevices(DeviceInfo* in_buffer);
 
 /* master control */
 void lib_setMasterVolume(float logVolume);

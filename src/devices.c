@@ -187,3 +187,19 @@ char* lib_getNameOfChannelOfOutputDevice(int deviceIndex, int channelIndex) {
         (csoundlib_state->output_devices)[deviceIndex]->current_layout.channels[channelIndex]
     );
 }
+
+void lib_getAvailableInputDevices(DeviceInfo* input_buffer) {
+    int num_input_devices = soundio_input_device_count(csoundlib_state->soundio);
+    for (int i = 0; i < num_input_devices; i++) {
+        input_buffer[i].name = (csoundlib_state->input_devices)[i]->name;
+        input_buffer[i].index = i;
+    }
+}
+
+void lib_getAvailableOutputDevices(DeviceInfo* input_buffer) {
+    int num_output_devices = soundio_output_device_count(csoundlib_state->soundio);
+    for (int i = 0; i < num_output_devices; i++) {
+        input_buffer[i].name = (csoundlib_state->output_devices)[i]->name;
+        input_buffer[i].index = i;
+    }
+}
