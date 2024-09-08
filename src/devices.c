@@ -18,7 +18,6 @@ int lib_loadInputDevices() {
     soundio_flush_events(csoundlib_state->soundio);
     int num_input_devices = lib_getNumInputDevices();
     int default_input_device_index = lib_getDefaultInputDeviceIndex();
-    csoundlib_state->track->input_device_index = default_input_device_index;
     if (num_input_devices > 0) {
         struct SoundIoDevice** input_devices = malloc(num_input_devices * sizeof( struct SoundIoDevice*) );
         if (!input_devices) {

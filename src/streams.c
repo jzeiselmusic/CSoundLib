@@ -131,7 +131,11 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     memset(csoundlib_state->mixed_output_buffer, 0, MAX_BUFFER_SIZE_BYTES);
 
     /* clear track input buffers*/
-    memset(csoundlib_state->track->input_buffer.buffer, 0, MAX_BUFFER_SIZE_BYTES);
+    hti it = ht_iterator(csoundlib_state->track_hash_table);
+    while (ht_next(&it)) {
+        trackObject* track_p = (trackObject*)it.value;
+        memset(track_p->input_buffer.buffer, 0, MAX_BUFFER_SIZE_BYTES);
+    }
 
     /* put input streams into track input buffers */
     _processInputStreams(&max_fill_samples);
@@ -269,7 +273,6 @@ static int _createOutputStream(int device_index, float microphone_latency) {
     outstream->underflow_callback = _underflowCallback;
 
     csoundlib_state->output_stream = outstream;
-    csoundlib_state->track->input_enabled = true;
     err = soundio_outstream_open(outstream);
     if (err != SoundIoErrorNone) return SoundIoErrorOutputStream;
     csoundlib_state->output_stream_initialized = true;
@@ -314,15 +317,16 @@ static void _processInputStreams(int* max_fill_samples) {
             /* calculate rms value for this particular input channel */
             float input_rms_val = calculate_rms_level(read_ptr, fill_bytes);
 
-            trackObject* track_p = csoundlib_state->track;
-            if (track_p->input_channel_index == channel) {
-                /* this track has chosen this channel for input */
+            hti it = ht_iterator(csoundlib_state->track_hash_table);
+            while (ht_next(&it)) {
+                trackObject* track_p = (trackObject*)it.value;
+                if (track_p->input_channel_index == channel) {
+                    /* this track has chosen this channel for input */
 
-                /* set rms value based on input RMS of this channel */
-                track_p->current_rms_levels.input_rms_level = input_rms_val;
+                    /* set rms value based on input RMS of this channel */
+                    track_p->current_rms_levels.input_rms_level = input_rms_val;
 
-                /* write the input stream to the track's input buffer */
-                if (track_p->input_enabled) {
+                    /* write the input stream to the track's input buffer */
                     add_and_scale_audio(
                         (uint8_t*)read_ptr, 
                         (uint8_t*)(track_p->input_buffer.buffer),
@@ -330,36 +334,47 @@ static void _processInputStreams(int* max_fill_samples) {
                         fill_bytes / csoundlib_state->input_dtype.bytes_in_buffer
                     );
                     track_p->input_buffer.write_bytes = fill_bytes;
-                }
-            } 
+                } 
+            }
             soundio_ring_buffer_advance_read_ptr(ring_buffer, fill_bytes);
         }
     }
 }
 
 static void _copyInputBuffersToOutputBuffers() {
-    trackObject* track_p = csoundlib_state->track;
-    add_and_scale_audio(
-        (uint8_t*)(track_p->input_buffer.buffer),
-        (uint8_t*)(csoundlib_state->mixed_output_buffer),
-        csoundlib_state->track->volume,
-        track_p->input_buffer.write_bytes / csoundlib_state->input_dtype.bytes_in_buffer
-    );
+    hti it = ht_iterator(csoundlib_state->track_hash_table);
+    while (ht_next(&it)) {
+        trackObject* track_p = (trackObject*)it.value;
+        if (!track_p->mute_enabled && (!csoundlib_state->solo_engaged || 
+                (csoundlib_state->solo_engaged && track_p->solo_enabled))) {
+            /* this needs to be scaled by volume for each track */
+            add_and_scale_audio(
+                (uint8_t*)(track_p->input_buffer.buffer),
+                (uint8_t*)(csoundlib_state->mixed_output_buffer),
+                track_p->volume,
+                track_p->input_buffer.write_bytes / csoundlib_state->input_dtype.bytes_in_buffer
+            );
 
-    track_p->current_rms_levels.output_rms_level = 
-            calculate_rms_level(
-                track_p->input_buffer.buffer,
-                track_p->input_buffer.write_bytes) * track_p->volume;
+            track_p->current_rms_levels.output_rms_level = 
+                    calculate_rms_level(
+                        track_p->input_buffer.buffer,
+                        track_p->input_buffer.write_bytes) * track_p->volume;
+        }
+    }
 }
 
 static void _processAudioEffects() {
-    for (int i = 0; i < csoundlib_state->num_effects; i++) {
-        csoundlib_state->effect_list[i](
-            csoundlib_state->track->input_buffer.buffer, 
-            csoundlib_state->track->input_buffer.write_bytes,
-            csoundlib_state->input_dtype.dtype,
-            csoundlib_state->sample_rate,
-            csoundlib_state->num_channels_available
-        );
+    hti it = ht_iterator(csoundlib_state->track_hash_table);
+    while (ht_next(&it)) {
+        trackObject* track_p = (trackObject*)it.value;
+        for (int i = 0; i < track_p->num_effects; i++) {
+            track_p->effect_list[i](
+                track_p->input_buffer.buffer, 
+                track_p->input_buffer.write_bytes,
+                csoundlib_state->input_dtype.dtype,
+                csoundlib_state->sample_rate,
+                csoundlib_state->num_channels_available
+            );
+        }
     }
 }

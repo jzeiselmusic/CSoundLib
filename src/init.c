@@ -61,8 +61,9 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
     struct SoundIo* soundio = soundio_create();
     
     unsigned char* mixed_output_buffer = (unsigned char*)calloc(MAX_BUFFER_SIZE_BYTES, sizeof(char));
-    trackObject* track = malloc(1 * sizeof(trackObject));
-    *track = (trackObject)
+    ht* hash_table = ht_create();
+
+    /* *track = (trackObject)
         {
             .volume = 1.0,
             .record_enabled = false,
@@ -73,15 +74,14 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
             .input_buffer.buffer = {0},
             .input_buffer.write_bytes = 0
         };
-    EffectPointer* e_list = malloc(50 * sizeof(EffectPointer));
+    */
 
-    if (soundio && mixed_output_buffer && track && csoundlib_state && e_list) {
+    if (soundio && mixed_output_buffer && csoundlib_state) {
         csoundlib_state->soundio = soundio;
         csoundlib_state->mixed_output_buffer = mixed_output_buffer;
         csoundlib_state->environment_initialized = true;
-        csoundlib_state->track = track;
-        csoundlib_state->effect_list = e_list;
-        csoundlib_state->num_effects = 0;
+        csoundlib_state->track_hash_table = hash_table;
+        csoundlib_state->num_tracks = 0;
         int backend_err = _connectToBackend();
         int input_dev_err = lib_loadInputDevices();
         int output_dev_err = lib_loadOutputDevices();
@@ -110,7 +110,6 @@ int lib_destroySession() {
     soundio_flush_events(csoundlib_state->soundio);
     soundio_destroy(csoundlib_state->soundio);
 
-    free(csoundlib_state->track);
     free(csoundlib_state->mixed_output_buffer);
 
     if (csoundlib_state->input_memory_allocated) {

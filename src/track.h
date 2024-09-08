@@ -26,14 +26,17 @@ typedef struct _rmsVals {
 } rmsVals;
 
 typedef struct _trackObj {
+    int track_id; // unique identifier, can be used as key in hash table
     float volume; // value greater than 0.0
-    bool input_enabled;
-    bool record_enabled;
-    bool is_recording;
+    bool mute_enabled;
+    bool solo_enabled;
     int input_device_index; // input device currently attached to this track
     int input_channel_index;
     rmsVals current_rms_levels;
     inputBuffer input_buffer;
+
+    EffectPointer* effect_list;
+    size_t num_effects;
 } trackObject;
 
 #include "csoundlib.h"

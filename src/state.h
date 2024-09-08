@@ -4,12 +4,13 @@
 #include <stdbool.h>
 #include "csl_types.h"
 #include "track.h"
+#include "hash.h"
 
 typedef struct _audioState {
     struct SoundIo* soundio;
     CSL_SR sample_rate; 
     InputDtype input_dtype;
-    trackObject* track;
+    float master_volume; // 0.0 -> 1.0 (parity)
 
     /* initialization */
     bool input_memory_allocated;
@@ -35,9 +36,13 @@ typedef struct _audioState {
     unsigned char* mixed_output_buffer; // every channel of data that is enabled gets mixed into output buffer
     float current_rms_ouput;
 
-    /* effects */
-    EffectPointer* effect_list;
-    size_t num_effects;
+    /* tracks */
+    ht* track_hash_table;
+    uint16_t num_tracks;
+    /* solo and mute */
+    uint16_t tracks_solod;
+    bool solo_engaged;
+
 } audio_state;
 
 #endif

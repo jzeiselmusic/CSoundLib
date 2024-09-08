@@ -56,12 +56,25 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type);
 int lib_destroySession();
 int lib_getCurrentBackend();
 
+/* tracks.h */
+int lib_addTrack(int trackId);
+int lib_deleteTrack(int trackId);
+void lib_deleteAllTracks(void);
+int lib_trackChooseInputDevice(int trackId, int device_index);
+int lib_trackChooseInputChannel(int trackId, int channel_index);
+float lib_getRmsVolumeTrackInput(int trackId);
+float lib_getRmsVolumeTrackOutput(int trackId);
+int lib_soloEnable(int trackId);
+int lib_soloDisable(int trackId);
+int lib_muteEnable(int trackId);
+int lib_muteDisable(int trackId);
+int lib_setTrackVolume(int trackId, float logVolume);
+
+/* audio streams */
 int lib_createAndStartInputStream(int deviceIndex, float microphone_latency);
 int lib_stopInputStream();
 int lib_createAndStartOutputStream(int deviceIndex, float microphone_latency);
 int lib_stopOutputStream();
-int lib_trackChooseInputDevice(int trackId, int device_index);
-int lib_trackChooseInputChannel(int trackId, int channel_index);
 float lib_getCurrentRmsOutput(void);
 
 /* functions for input devices */
@@ -84,9 +97,11 @@ char* lib_getOutputDeviceId(int index);
 int lib_getNumChannelsOfOutputDevice(int index);
 char* lib_getNameOfChannelOfOutputDevice(int deviceIndex, int channelIndex);
 
-/* functions for managing audio streams */
-void lib_setVolume(float volume);
-void lib_registerEffect(EffectPointer effect);
+/* master control */
+void lib_setMasterVolume(float logVolume);
+
+/* effects */
+int lib_registerEffect(int trackId, EffectPointer effect);
 
 #ifdef __cplusplus
 }
