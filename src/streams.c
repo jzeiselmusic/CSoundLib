@@ -9,7 +9,6 @@
 #include "wav.h"
 #include "errors.h"
 #include "track.h"
-
 #include <fcntl.h>
 
 static int _createInputStream(int device_index, float microphone_latency);
@@ -17,6 +16,9 @@ static int _createOutputStream(int device_index, float microphone_latency);
 static void _processInputStreams(int* max_fill_samples);
 static void _copyInputBuffersToOutputBuffers();
 static void _processAudioEffects();
+static void _processInputReadyCallback();
+static void _processOutputReadyCallback();
+static void _processMasterOutputReadyCallback();
 
 extern audio_state* csoundlib_state;
 
@@ -129,6 +131,7 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
 
     /* clear mix buffer */
     memset(csoundlib_state->mixed_output_buffer, 0, MAX_BUFFER_SIZE_BYTES);
+    csoundlib_state->mixed_output_buffer_len = 0;
 
     /* clear track input buffers*/
     hti it = ht_iterator(csoundlib_state->track_hash_table);
@@ -140,11 +143,21 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     /* put input streams into track input buffers */
     _processInputStreams(&max_fill_samples);
 
+    /* give user the raw input buffer */
+    _processInputReadyCallback();
+
+    /* process any registered effects for each input buffer */
     _processAudioEffects();
+
+    /* give user the effected track output buffer */
+    _processOutputReadyCallback();
 
     /* now copy input buffer to output scaled by volume */
     /* note: THIS IS WHERE VOLUME SCALING HAPPENS */
     _copyInputBuffersToOutputBuffers();
+
+    /* give user the mixed output buffer */
+    _processMasterOutputReadyCallback();
 
     /* set master output rms level */
     csoundlib_state->current_rms_ouput = calculate_rms_level(csoundlib_state->mixed_output_buffer, frame_count_max * outstream->bytes_per_frame);
@@ -354,7 +367,9 @@ static void _copyInputBuffersToOutputBuffers() {
                 track_p->volume,
                 track_p->input_buffer.write_bytes / csoundlib_state->input_dtype.bytes_in_buffer
             );
-
+            if (csoundlib_state->mixed_output_buffer_len < track_p->input_buffer.write_bytes) {
+                csoundlib_state->mixed_output_buffer_len = track_p->input_buffer.write_bytes;
+            }
             track_p->current_rms_levels.output_rms_level = 
                     calculate_rms_level(
                         track_p->input_buffer.buffer,
@@ -369,6 +384,7 @@ static void _processAudioEffects() {
         trackObject* track_p = (trackObject*)it.value;
         for (int i = 0; i < track_p->num_effects; i++) {
             track_p->effect_list[i](
+                track_p->track_id,
                 track_p->input_buffer.buffer, 
                 track_p->input_buffer.write_bytes,
                 csoundlib_state->input_dtype.dtype,
@@ -377,4 +393,44 @@ static void _processAudioEffects() {
             );
         }
     }
+}
+
+static void _processInputReadyCallback() {
+    hti it = ht_iterator(csoundlib_state->track_hash_table);
+    while (ht_next(&it)) {
+        trackObject* track_p = (trackObject*)it.value;
+        track_p->input_ready_callback(
+            track_p->track_id,
+            track_p->input_buffer.buffer,
+            track_p->input_buffer.write_bytes,
+            csoundlib_state->input_dtype.dtype,
+            csoundlib_state->sample_rate,
+            csoundlib_state->num_channels_available
+        );
+    }
+}
+
+static void _processOutputReadyCallback() {
+    hti it = ht_iterator(csoundlib_state->track_hash_table);
+    while (ht_next(&it)) {
+        trackObject* track_p = (trackObject*)it.value;
+        track_p->output_ready_callback(
+            track_p->track_id,
+            track_p->input_buffer.buffer,
+            track_p->input_buffer.write_bytes,
+            csoundlib_state->input_dtype.dtype,
+            csoundlib_state->sample_rate,
+            csoundlib_state->num_channels_available
+        );
+    }
+}
+
+static void _processMasterOutputReadyCallback() {
+    csoundlib_state->output_callback(
+        csoundlib_state->mixed_output_buffer,
+        csoundlib_state->mixed_output_buffer_len,
+        csoundlib_state->input_dtype.dtype,
+        csoundlib_state->sample_rate,
+        csoundlib_state->num_channels_available
+    );
 }

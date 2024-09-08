@@ -49,7 +49,22 @@ typedef enum {
 } CSL_SR;
 
 /* function pointers */
-typedef void (*EffectPointer) (unsigned char *buffer, size_t length, CSL_DTYPE data_type, CSL_SR sample_rate, size_t num_channels);
+typedef void (*TrackAudioAvailableCallback) (
+    int trackId,
+    unsigned char *buffer, 
+    size_t length, 
+    CSL_DTYPE data_type, 
+    CSL_SR sample_rate, 
+    size_t num_channels
+);
+
+typedef void (*MasterAudioAvailableCallback) (
+    unsigned char *buffer,
+    size_t length,
+    CSL_DTYPE data_type,
+    CSL_SR sample_rate,
+    size_t num_channels
+);
 
 /* describes input or output devices to the user */
 typedef struct {
@@ -102,8 +117,11 @@ void lib_getAvailableOutputDevices(DeviceInfo* in_buffer);
 /* master control */
 void lib_setMasterVolume(float logVolume);
 
-/* effects */
-int lib_registerEffect(int trackId, EffectPointer effect);
+/* callbacks */
+int lib_registerEffect(int trackId, TrackAudioAvailableCallback effect);
+int lib_registerInputReadyCallback(int trackId, TrackAudioAvailableCallback callback);
+int lib_registerOutputReadyCallback(int trackId, TrackAudioAvailableCallback callback);
+int lib_registerMasterOutputReadyCallback(MasterAudioAvailableCallback callback);
 
 #ifdef __cplusplus
 }

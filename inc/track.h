@@ -35,8 +35,11 @@ typedef struct _trackObj {
     rmsVals current_rms_levels;
     inputBuffer input_buffer;
 
-    EffectPointer* effect_list;
+    TrackAudioAvailableCallback* effect_list;
     size_t num_effects;
+
+    TrackAudioAvailableCallback input_ready_callback;
+    TrackAudioAvailableCallback output_ready_callback;
 } trackObject;
 
 #include "csoundlib.h"

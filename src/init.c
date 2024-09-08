@@ -13,6 +13,14 @@
 
 extern audio_state* csoundlib_state;
 
+static inline void master_dummy_callback(
+    unsigned char *buffer, 
+    size_t length, 
+    CSL_DTYPE data_type, 
+    CSL_SR sample_rate, 
+    size_t num_channels   
+) {};
+
 static int _connectToBackend();
 static void _deallocateAllMemory();
 static int _setGlobalInputSampleRate(CSL_SR sample_rate);
@@ -69,6 +77,7 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
         csoundlib_state->environment_initialized = true;
         csoundlib_state->track_hash_table = hash_table;
         csoundlib_state->num_tracks = 0;
+        csoundlib_state->output_callback = &master_dummy_callback;
         int backend_err = _connectToBackend();
         int input_dev_err = lib_loadInputDevices();
         int output_dev_err = lib_loadOutputDevices();

@@ -28,16 +28,16 @@ out/track.o: src/track.c inc/track.h inc/state.h inc/errors.h inc/csl_util.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # Target library
-TARGET = libcsoundlib.a
+STATIC_TARGET = libcsoundlib.a
 
 # Default rule to build everything
-all: outdir $(TARGET)
+all: outdir $(STATIC_TARGET)
 
 outdir:
 	mkdir -p out
 
 # Rule to create the static library
-$(TARGET): $(OBJS)
+$(STATIC_TARGET): $(OBJS)
 	ar rcs out/$@ $(OBJS)
 
 # Clean rule to remove object files
@@ -45,6 +45,6 @@ clean:
 	rm -f $(OBJS) out/*.a out/*.dylib
 
 install:
-	mv out/$(TARGET) /usr/local/lib/$(TARGET)
+	mv out/$(STATIC_TARGET) /usr/local/lib/$(STATIC_TARGET)
 
 .PHONY: all clean

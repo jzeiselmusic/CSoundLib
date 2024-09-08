@@ -31,14 +31,17 @@ typedef struct _audioState {
     struct SoundIoOutStream* output_stream;
     bool output_stream_started; // should intialize to -1
     bool output_stream_initialized;
+    MasterAudioAvailableCallback output_callback;
 
     /* mixed inputs */
     unsigned char* mixed_output_buffer; // every channel of data that is enabled gets mixed into output buffer
+    size_t mixed_output_buffer_len;
     float current_rms_ouput;
 
     /* tracks */
     ht* track_hash_table;
     uint16_t num_tracks;
+
     /* solo and mute */
     uint16_t tracks_solod;
     bool solo_engaged;
