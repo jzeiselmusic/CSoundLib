@@ -46,7 +46,7 @@ static void _deallocateAllMemory() {
     free(csoundlib_state);
 }
 
-int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
+int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
     int err;
     csoundlib_state = malloc( sizeof(audio_state) );
 
@@ -79,8 +79,8 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
         csoundlib_state->num_tracks = 0;
         csoundlib_state->output_callback = &master_dummy_callback;
         int backend_err = _connectToBackend();
-        int input_dev_err = lib_loadInputDevices();
-        int output_dev_err = lib_loadOutputDevices();
+        int input_dev_err = soundlib_load_input_devices();
+        int output_dev_err = soundlib_load_output_devices();
 
         if (backend_err != SoundIoErrorNone) {
             return SoundIoErrorBackendUnavailable;
@@ -98,9 +98,9 @@ int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type) {
     } 
 }
 
-int lib_destroySession() {
-    int ret = lib_stopOutputStream();
-    ret = lib_stopInputStream();
+int soundlib_destroy_session() {
+    int ret = soundlib_stop_output_stream();
+    ret = soundlib_stop_input_stream();
     cleanup_input_devices();
     cleanup_output_devices();
     soundio_flush_events(csoundlib_state->soundio);
@@ -120,7 +120,7 @@ int lib_destroySession() {
     return SoundIoErrorNone;
 }
 
-int lib_getCurrentBackend() {
+int soundlib_get_current_backend() {
     if (csoundlib_state->backend_connected) {
         soundio_flush_events(csoundlib_state->soundio);
         return csoundlib_state->soundio->current_backend;

@@ -73,55 +73,55 @@ typedef struct {
 } DeviceInfo;
 
 /* init.h */
-int lib_startSession(CSL_SR sample_rate, CSL_DTYPE data_type);
-int lib_destroySession();
-int lib_getCurrentBackend();
+int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type);
+int soundlib_destroy_session();
+int soundlib_get_current_backend();
 
 /* tracks.h */
-int lib_addTrack(int trackId);
-int lib_deleteTrack(int trackId);
-void lib_deleteAllTracks(void);
-int lib_trackChooseInputDevice(int trackId, int device_index);
-int lib_trackChooseInputChannel(int trackId, int channel_index);
-float lib_getRmsVolumeTrackInput(int trackId);
-float lib_getRmsVolumeTrackOutput(int trackId);
-int lib_soloEnable(int trackId);
-int lib_soloDisable(int trackId);
-int lib_muteEnable(int trackId);
-int lib_muteDisable(int trackId);
-int lib_setTrackVolume(int trackId, float logVolume);
+int soundlib_add_track(int trackId);
+int soundlib_delete_track(int trackId);
+void soundlib_delete_all_tracks(void);
+int soundlib_choose_input_device(int trackId, int device_index);
+int soundlib_choose_input_channel(int trackId, int channel_index);
+float soundlib_get_track_input_rms(int trackId);
+float soundlib_get_track_output_rms(int trackId);
+int soundlib_solo_enable(int trackId);
+int soundlib_solo_disable(int trackId);
+int soundlib_mute_enable(int trackId);
+int soundlib_mute_disable(int trackId);
+int soundlib_set_track_volume(int trackId, float logVolume);
 
 /* audio streams */
-int lib_createAndStartInputStream(int deviceIndex, float microphone_latency);
-int lib_stopInputStream();
-int lib_createAndStartOutputStream(int deviceIndex, float microphone_latency);
-int lib_stopOutputStream();
-float lib_getCurrentRmsOutput();
+int soundlib_start_input_stream(int deviceIndex, float microphone_latency);
+int soundlib_stop_input_stream();
+int soundlib_start_output_stream(int deviceIndex, float microphone_latency);
+int soundlib_stop_output_stream();
+float soundlib_get_current_output_rms();
 
 /* functions for input devices */
-int lib_loadInputDevices();
-int lib_getDefaultInputDeviceIndex();
-int lib_getNumInputDevices();
-char* lib_getInputDeviceName(int index);
-int lib_getNumChannelsOfInputDevice(int index);
-void lib_getAvailableInputDevices(DeviceInfo* in_buffer);
+int soundlib_load_input_devices();
+int soundlib_get_default_input_device_index();
+int soundlib_get_num_input_devices();
+char* soundlib_get_input_device_name(int index);
+int soundlib_get_num_channels_of_input_device(int index);
+void soundlib_get_available_input_devices(DeviceInfo* in_buffer);
 
 /* functions for output devices */
-int lib_loadOutputDevices();
-int lib_getDefaultOutputDeviceIndex();
-int lib_getNumOutputDevices();
-char* lib_getOutputDeviceName(int index);
-int lib_getNumChannelsOfOutputDevice(int index);
-void lib_getAvailableOutputDevices(DeviceInfo* in_buffer);
+int soundlib_load_output_devices();
+int soundlib_get_default_output_device_index();
+int soundlib_get_num_output_devices();
+char* soundlib_get_output_device_name(int index);
+int soundlib_get_num_channels_of_output_device(int index);
+void soundlib_get_available_output_devices(DeviceInfo* in_buffer);
 
 /* master control */
-void lib_setMasterVolume(float logVolume);
+void soundlib_set_master_volume(float logVolume);
 
 /* callbacks */
-int lib_registerEffect(int trackId, TrackAudioAvailableCallback effect);
-int lib_registerInputReadyCallback(int trackId, TrackAudioAvailableCallback callback);
-int lib_registerOutputReadyCallback(int trackId, TrackAudioAvailableCallback callback);
-int lib_registerMasterOutputReadyCallback(MasterAudioAvailableCallback callback);
+int soundlib_register_effect(int trackId, TrackAudioAvailableCallback effect);
+int soundlib_register_input_ready_callback(int trackId, TrackAudioAvailableCallback callback);
+int soundlib_register_output_ready_callback(int trackId, TrackAudioAvailableCallback callback);
+int soundlib_register_master_output_ready_callback(MasterAudioAvailableCallback callback);
 
 #ifdef __cplusplus
 }

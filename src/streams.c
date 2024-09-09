@@ -36,7 +36,7 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
         /* wait until output is done to start reading again */
     }
 
-    for (int i = 0; i < lib_getNumInputDevices(); i++) {
+    for (int i = 0; i < soundlib_get_num_input_devices(); i++) {
         if ((csoundlib_state->input_devices)[i]->id == instream->device->id) {
             device_index = i;
             break;
@@ -113,7 +113,7 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
 
     /* search for device index of this output stream */
     int device_index = -1;
-    for (int i = 0; i < lib_getNumOutputDevices(); i++) {
+    for (int i = 0; i < soundlib_get_num_output_devices(); i++) {
         if (csoundlib_state->output_devices[i]->id == outstream->device->id) {
             device_index = i;
             break;
@@ -219,7 +219,7 @@ static int _createInputStream(int device_index, float microphone_latency) {
     err = soundio_instream_open(instream);
     if (err != SoundIoErrorNone) return SoundIoErrorInputStream;
 
-    int num_channels = lib_getNumChannelsOfInputDevice(device_index);
+    int num_channels = soundlib_get_num_channels_of_input_device(device_index);
     csoundlib_state->num_channels_available = num_channels;
     /* reset channel buffers */
     free(csoundlib_state->input_channel_buffers);
@@ -239,7 +239,7 @@ static int _createInputStream(int device_index, float microphone_latency) {
     return SoundIoErrorNone;
 }
 
-int lib_createAndStartInputStream(int device_index, float microphone_latency) {
+int soundlib_start_input_stream(int device_index, float microphone_latency) {
     int err;
     err = _createInputStream(device_index, microphone_latency);
     if (err != SoundIoErrorNone) return err;
@@ -251,7 +251,7 @@ int lib_createAndStartInputStream(int device_index, float microphone_latency) {
     return SoundIoErrorNone;
 }
 
-int lib_stopInputStream() {
+int soundlib_stop_input_stream() {
     if (csoundlib_state->input_stream_started) {
         csoundlib_state->input_stream_started = false;
         csoundlib_state->input_stream_written = false;
@@ -293,7 +293,7 @@ static int _createOutputStream(int device_index, float microphone_latency) {
     return SoundIoErrorNone;
 }
 
-int lib_createAndStartOutputStream(int deviceIndex, float microphone_latency) {
+int soundlib_start_output_stream(int deviceIndex, float microphone_latency) {
     int err;
     err = _createOutputStream(deviceIndex, microphone_latency);
     if (err != SoundIoErrorNone) return err;
@@ -305,7 +305,7 @@ int lib_createAndStartOutputStream(int deviceIndex, float microphone_latency) {
     return SoundIoErrorNone;
 }
 
-int lib_stopOutputStream() {
+int soundlib_stop_output_stream() {
     if (csoundlib_state->output_stream_started) {
         csoundlib_state->output_stream_started = false;
         csoundlib_state->output_stream_initialized = false;

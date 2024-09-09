@@ -14,7 +14,7 @@ static inline void dummy_callback(
     size_t num_channels
 ) {};
 
-int lib_addTrack(int trackId) {
+int soundlib_add_track(int trackId) {
     trackObject* tp = malloc(sizeof(trackObject));
     TrackAudioAvailableCallback* allocated_effects = (TrackAudioAvailableCallback*)malloc(50 * sizeof(TrackAudioAvailableCallback));
     trackObject track =
@@ -23,7 +23,7 @@ int lib_addTrack(int trackId) {
             .volume = 1.0,
             .solo_enabled = false,
             .mute_enabled = false,
-            .input_device_index = lib_getDefaultInputDeviceIndex(),
+            .input_device_index = soundlib_get_default_input_device_index(),
             .input_channel_index = 0,
             .current_rms_levels = {0.0, 0.0},
             .input_buffer.buffer = {0},
@@ -43,7 +43,7 @@ int lib_addTrack(int trackId) {
     return SoundIoErrorNone;
 }
 
-int lib_deleteTrack(int trackId) {
+int soundlib_delete_track(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -71,7 +71,7 @@ static int _deleteTrack(const char* key) {
     return SoundIoErrorNone;
 }
 
-int lib_trackChooseInputDevice(int trackId, int device_index) {
+int soundlib_choose_input_device(int trackId, int device_index) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -80,7 +80,7 @@ int lib_trackChooseInputDevice(int trackId, int device_index) {
     return SoundIoErrorNone;
 }
 
-int lib_trackChooseInputChannel(int trackId, int channel_index) {
+int soundlib_choose_input_channel(int trackId, int channel_index) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -89,7 +89,7 @@ int lib_trackChooseInputChannel(int trackId, int channel_index) {
     return SoundIoErrorNone;
 }
 
-float lib_getRmsVolumeTrackInput(int trackId) {
+float soundlib_get_track_input_rms(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -97,7 +97,7 @@ float lib_getRmsVolumeTrackInput(int trackId) {
     return track_p->current_rms_levels.input_rms_level;
 }
 
-float lib_getRmsVolumeTrackOutput(int trackId) {
+float soundlib_get_track_output_rms(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -105,7 +105,7 @@ float lib_getRmsVolumeTrackOutput(int trackId) {
     return track_p->current_rms_levels.output_rms_level;
 }
 
-int lib_soloEnable(int trackId) {
+int soundlib_solo_enable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -116,7 +116,7 @@ int lib_soloEnable(int trackId) {
     return SoundIoErrorNone;
 }
 
-int lib_soloDisable(int trackId) {
+int soundlib_solo_disable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -128,7 +128,7 @@ int lib_soloDisable(int trackId) {
     return SoundIoErrorNone;
 }
 
-int lib_muteEnable(int trackId) {
+int soundlib_mute_enable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -137,7 +137,7 @@ int lib_muteEnable(int trackId) {
     return SoundIoErrorNone;
 }
 
-int lib_muteDisable(int trackId) {
+int soundlib_mute_disable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -146,7 +146,7 @@ int lib_muteDisable(int trackId) {
     return SoundIoErrorNone;
 }
 
-int lib_setTrackVolume(int trackId, float logVolume) {
+int soundlib_set_track_volume(int trackId, float logVolume) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -157,11 +157,11 @@ int lib_setTrackVolume(int trackId, float logVolume) {
     return SoundIoErrorNone;
 }
 
-void lib_setMasterVolume(float logVolume) {
+void soundlib_set_master_volume(float logVolume) {
     csoundlib_state->master_volume = log_to_mag(logVolume);
 }
 
-void lib_deleteAllTracks(void) {
+void soundlib_delete_all_tracks(void) {
     /* only frees the sound files from the track and frees memory hold track.
     *  does not call ht_destroy()
     */
@@ -171,7 +171,7 @@ void lib_deleteAllTracks(void) {
     }
 }
 
-int lib_registerEffect(int trackId, TrackAudioAvailableCallback effect) {
+int soundlib_register_effect(int trackId, TrackAudioAvailableCallback effect) {
     /* add effect to track */
     const char key[50];
     ht_getkey(trackId, key);
@@ -182,7 +182,7 @@ int lib_registerEffect(int trackId, TrackAudioAvailableCallback effect) {
     return SoundIoErrorNone;
 }
 
-int lib_registerInputReadyCallback(int trackId, TrackAudioAvailableCallback callback) {
+int soundlib_register_input_ready_callback(int trackId, TrackAudioAvailableCallback callback) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -191,7 +191,7 @@ int lib_registerInputReadyCallback(int trackId, TrackAudioAvailableCallback call
     return SoundIoErrorNone;
 }
 
-int lib_registerOutputReadyCallback(int trackId, TrackAudioAvailableCallback callback) {
+int soundlib_register_output_ready_callback(int trackId, TrackAudioAvailableCallback callback) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
@@ -200,7 +200,7 @@ int lib_registerOutputReadyCallback(int trackId, TrackAudioAvailableCallback cal
     return SoundIoErrorNone;
 }
 
-int lib_registerMasterOutputReadyCallback(MasterAudioAvailableCallback callback) {
+int soundlib_register_master_output_ready_callback(MasterAudioAvailableCallback callback) {
     csoundlib_state->output_callback = callback;
     return SoundIoErrorNone;
 }
