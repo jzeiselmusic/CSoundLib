@@ -210,6 +210,7 @@ static int _createInputStream(int device_index, float microphone_latency) {
         case CSL_S16: instream->format = SoundIoFormatS16LE; break;
         case CSL_S32: instream->format = SoundIoFormatS32LE; break;
         case CSL_S8: instream->format = SoundIoFormatS8; break;
+        case CSL_FL32: instream->format = SoundIoFormatFloat32NE; break;
     }
     instream->sample_rate = get_sample_rate(csoundlib_state->sample_rate);
 
@@ -221,7 +222,7 @@ static int _createInputStream(int device_index, float microphone_latency) {
     csoundlib_state->input_stream = instream;
 
     err = soundio_instream_open(instream);
-    if (err != SoundIoErrorNone) return SoundIoErrorInputStream;
+    if (err != SoundIoErrorNone) return err;
 
     int num_channels = soundlib_get_num_channels_of_input_device(device_index);
     csoundlib_state->num_channels_available = num_channels;
@@ -282,6 +283,7 @@ static int _createOutputStream(int device_index, float microphone_latency) {
         case CSL_S16: outstream->format = SoundIoFormatS16LE; break;
         case CSL_S32: outstream->format = SoundIoFormatS32LE; break;
         case CSL_S8: outstream->format = SoundIoFormatS8; break;
+        case CSL_FL32: outstream->format = SoundIoFormatFloat32NE; break;
     }
     outstream->sample_rate = get_sample_rate(csoundlib_state->sample_rate);
     outstream->layout = output_device->current_layout;
@@ -291,7 +293,7 @@ static int _createOutputStream(int device_index, float microphone_latency) {
 
     csoundlib_state->output_stream = outstream;
     err = soundio_outstream_open(outstream);
-    if (err != SoundIoErrorNone) return SoundIoErrorOutputStream;
+    if (err != SoundIoErrorNone) return err;
     csoundlib_state->output_stream_initialized = true;
 
     return SoundIoErrorNone;
@@ -328,7 +330,7 @@ static void _processInputStreams(int* max_fill_samples) {
             unsigned char *read_ptr = (unsigned char*)soundio_ring_buffer_read_ptr(ring_buffer);
             /* number of bytes available for reading */
             int fill_bytes = soundio_ring_buffer_fill_count(ring_buffer);
-            int fill_samples = fill_bytes / BYTES_PER_FRAME_MONO;
+            int fill_samples = fill_bytes / csoundlib_state->input_dtype.bytes_in_buffer;
             if (fill_samples > *max_fill_samples) *max_fill_samples = fill_samples;
 
             /* calculate rms value for this particular input channel */

@@ -61,5 +61,6 @@ InputDtype CSL_U24_t;
 InputDtype CSL_S24_t;
 InputDtype CSL_U32_t;
 InputDtype CSL_S32_t;
+InputDtype CSL_FL32_t;
 
 #endif

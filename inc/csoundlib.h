@@ -20,23 +20,39 @@ extern "C" {
 #define MAX_NUM_EFFECTS                           50
 
 /* errors.h */
-
-#define SoundIoErrorDevicesNotInitialized         16
-#define SoundIoErrorEnvironmentNotInitialized     17
-#define SoundIoErrorIndexOutOfBounds              18
-#define SoundIoErrorDevicesNotLoaded              19
-#define SoundIoInputStreamError                   20
-#define SoundIoInputMemoryNotAllocated            21
-#define SoundIoOutputMemoryNotAllocated           22
-#define SoundIoErrorTrackNotFound                 23
-#define SoundIoErrorOpeningFile                   24
-#define SoundIoErrorFileNotFound                  25
-#define SoundIoErrorReadingWavForMetronome        26
-#define SoundIoErrorInputStream                   27
-#define SoundIoErrorOutputStream                  28
-#define SoundIoErrorLoadingInputDevices           29
-#define SoundIoErrorLoadingOutputDevices          30
-#define SoundIoErrorSettingSampleRate             31
+/* 
+#define SoundIoErrorNone 	                      0
+#define SoundIoErrorNoMem 	                      1
+#define SoundIoErrorInitAudioBackend 	          2
+#define SoundIoErrorSystemResources 	          3
+#define SoundIoErrorOpeningDevice 	              4
+#define SoundIoErrorNoSuchDevice 	              5
+#define SoundIoErrorInvalid 	                  6
+#define SoundIoErrorBackendUnavailable 	          7
+#define SoundIoErrorStreaming 	                  8
+#define SoundIoErrorIncompatibleDevice 	          9
+#define SoundIoErrorNoSuchClient 	              10
+#define SoundIoErrorIncompatibleBackend 	      11
+#define SoundIoErrorBackendDisconnected 	      12
+#define SoundIoErrorInterrupted 	              13
+#define SoundIoErrorUnderflow 	                  14
+#define SoundIoErrorEncodingString 	              15
+*/
+#define CSLErrorDevicesNotInitialized             16
+#define CSLErrorEnvironmentNotInitialized         17
+#define CSLErrorIndexOutOfBounds                  18
+#define CSLErrorDevicesNotLoaded                  19
+#define CSLErrorInputMemoryNotAllocated           20
+#define CSLErrorOutputMemoryNotAllocated          21
+#define CSLErrorTrackNotFound                     22
+#define CSLErrorOpeningFile                       23
+#define CSLErrorFileNotFound                      24
+#define CSLErrorReadingWavForMetronome            25
+#define CSLErrorInputStream                       26
+#define CSLErrorOutputStream                      27
+#define CSLErrorLoadingInputDevices               28
+#define CSLErrorLoadingOutputDevices              29
+#define CSLErrorSettingSampleRate                 30
 
 /**
  * @enum CSL_DTYPE

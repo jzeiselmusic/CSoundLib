@@ -62,6 +62,7 @@ int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
         case CSL_S16: csoundlib_state->input_dtype = CSL_S16_t; break;
         case CSL_S24: csoundlib_state->input_dtype = CSL_S24_t; break;
         case CSL_S32: csoundlib_state->input_dtype = CSL_S32_t; break;
+        case CSL_FL32: csoundlib_state->input_dtype = CSL_FL32_t; break;
     } 
 
     struct SoundIo* soundio = soundio_create();
@@ -87,10 +88,10 @@ int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
             return SoundIoErrorBackendUnavailable;
         }
         if (input_dev_err != SoundIoErrorNone) {
-            return SoundIoErrorLoadingInputDevices;
+            return CSLErrorLoadingInputDevices;
         }
         if (output_dev_err != SoundIoErrorNone) {
-            return SoundIoErrorLoadingOutputDevices;
+            return CSLErrorLoadingOutputDevices;
         }
         return SoundIoErrorNone;
     }
@@ -135,7 +136,7 @@ int soundlib_get_current_backend() {
 
 int _checkEnvironmentAndBackendConnected() {
     if (!csoundlib_state->environment_initialized) {
-        return SoundIoErrorEnvironmentNotInitialized;
+        return CSLErrorEnvironmentNotInitialized;
     }
     if (!csoundlib_state->backend_connected) {
         return SoundIoErrorBackendDisconnected;
@@ -154,20 +155,20 @@ static int _setGlobalInputSampleRate(CSL_SR sample_rate) {
     UInt32 size = sizeof(deviceID);
     Float64 desiredSampleRate = (Float64)get_sample_rate(sample_rate);
     OSStatus status = AudioObjectGetPropertyData(kAudioObjectSystemObject, &property, 0, NULL, &size, &deviceID);
-    if (status != noErr) return SoundIoErrorSettingSampleRate;
+    if (status != noErr) return CSLErrorSettingSampleRate;
 
     // Set the sample rate
     property.mSelector = kAudioDevicePropertyNominalSampleRate;
     property.mScope = kAudioObjectPropertyScopeInput;
     
     status = AudioObjectSetPropertyData(deviceID, &property, 0, NULL, sizeof(desiredSampleRate), &desiredSampleRate);
-    if (status != noErr) return SoundIoErrorSettingSampleRate;
+    if (status != noErr) return CSLErrorSettingSampleRate;
 
     // Verify the new sample rate
     Float64 actualSampleRate;
     size = sizeof(actualSampleRate);
     status = AudioObjectGetPropertyData(deviceID, &property, 0, NULL, &size, &actualSampleRate);
-    if (status != noErr) return SoundIoErrorSettingSampleRate;
+    if (status != noErr) return CSLErrorSettingSampleRate;
 
     return SoundIoErrorNone;
 }
@@ -183,20 +184,20 @@ static int _setGlobalOutputSampleRate(CSL_SR sample_rate) {
     UInt32 size = sizeof(deviceID);
     Float64 desiredSampleRate = (Float64)get_sample_rate(sample_rate);
     OSStatus status = AudioObjectGetPropertyData(kAudioObjectSystemObject, &property, 0, NULL, &size, &deviceID);
-    if (status != noErr) return SoundIoErrorSettingSampleRate;
+    if (status != noErr) return CSLErrorSettingSampleRate;
 
     // Set the sample rate
     property.mSelector = kAudioDevicePropertyNominalSampleRate;
     property.mScope = kAudioObjectPropertyScopeInput;
     
     status = AudioObjectSetPropertyData(deviceID, &property, 0, NULL, sizeof(desiredSampleRate), &desiredSampleRate);
-    if (status != noErr) return SoundIoErrorSettingSampleRate;
+    if (status != noErr) return CSLErrorSettingSampleRate;
 
     // Verify the new sample rate
     Float64 actualSampleRate;
     size = sizeof(actualSampleRate);
     status = AudioObjectGetPropertyData(deviceID, &property, 0, NULL, &size, &actualSampleRate);
-    if (status != noErr) return SoundIoErrorSettingSampleRate;
+    if (status != noErr) return CSLErrorSettingSampleRate;
 
     return SoundIoErrorNone;
 }

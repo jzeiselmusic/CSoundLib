@@ -84,6 +84,16 @@ InputDtype CSL_S32_t = {
     .min_size = CSL_S32_MIN
 };
 
+InputDtype CSL_FL32_t = {
+    .dtype = CSL_FL32,
+    .bit_depth = 32,
+    .bytes_in_buffer = 4,
+    .bytes_in_sample = 4,
+    .is_signed = true,
+    .max_size = 1.0,
+    .min_size = 0.0
+};
+
 /* ********************************************* */
 /* ********************************************* */
 

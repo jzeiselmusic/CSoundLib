@@ -45,7 +45,7 @@ int soundlib_delete_track(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
 
     track_p->track_effects.num_effects = 0;
     free(track_p->track_effects.track_effect_list);
@@ -58,7 +58,7 @@ int soundlib_delete_track(int trackId) {
 
 static int _deleteTrack(const char* key) {
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
 
     track_p->track_effects.num_effects = 0;
     free(track_p->track_effects.track_effect_list);
@@ -73,7 +73,7 @@ int soundlib_choose_input_device(int trackId, int device_index) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->input_device_index = device_index;
     return SoundIoErrorNone;
 }
@@ -82,7 +82,7 @@ int soundlib_choose_input_channel(int trackId, int channel_index) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->input_channel_index = channel_index;
     return SoundIoErrorNone;
 }
@@ -107,7 +107,7 @@ int soundlib_solo_enable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->solo_enabled = true;
     csoundlib_state->tracks_solod += 1;
     csoundlib_state->solo_engaged = true;
@@ -118,7 +118,7 @@ int soundlib_solo_disable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->solo_enabled = false;
     csoundlib_state->tracks_solod -= 1;
     if (csoundlib_state->tracks_solod > 0) csoundlib_state->solo_engaged = true;
@@ -130,7 +130,7 @@ int soundlib_mute_enable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->mute_enabled = true;
     return SoundIoErrorNone;
 }
@@ -139,7 +139,7 @@ int soundlib_mute_disable(int trackId) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->mute_enabled = false;
     return SoundIoErrorNone;
 }
@@ -148,7 +148,7 @@ int soundlib_set_track_volume(int trackId, float logVolume) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     /* turn db volume into magnitude volume */
     float mag = log_to_mag(logVolume);
     track_p->volume = mag;

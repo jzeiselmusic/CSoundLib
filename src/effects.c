@@ -8,7 +8,7 @@ int soundlib_register_effect(int trackId, TrackAudioAvailableCallback effect) {
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->track_effects.track_effect_list[track_p->track_effects.num_effects] = effect;
     track_p->track_effects.num_effects += 1;
     return SoundIoErrorNone;
@@ -18,7 +18,7 @@ int soundlib_register_input_ready_callback(int trackId, TrackAudioAvailableCallb
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->input_ready_callback = callback;
     return SoundIoErrorNone;
 }
@@ -27,7 +27,7 @@ int soundlib_register_output_ready_callback(int trackId, TrackAudioAvailableCall
     const char key[50];
     ht_getkey(trackId, key);
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
+    if (track_p == NULL) return CSLErrorTrackNotFound;
     track_p->output_ready_callback = callback;
     return SoundIoErrorNone;
 }
