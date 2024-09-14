@@ -17,6 +17,8 @@ extern "C" {
 #include <stdlib.h>
 #include <soundio/soundio.h>
 
+#define MAX_NUM_EFFECTS                           50
+
 /* errors.h */
 
 #define SoundIoErrorDevicesNotInitialized         16
@@ -441,7 +443,7 @@ int soundlib_register_effect(int trackId, TrackAudioAvailableCallback effect);
  * @brief Register a callback function that provides user with audio input to a specific track
  *
  * @param trackId audio to track with this id
- * @param effect function pointer described by TrackAudioAvailableCallback
+ * @param callback function pointer described by TrackAudioAvailableCallback
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
 int soundlib_register_input_ready_callback(int trackId, TrackAudioAvailableCallback callback);
@@ -451,7 +453,7 @@ int soundlib_register_input_ready_callback(int trackId, TrackAudioAvailableCallb
  * This audio buffer will be post any effects and volume applied.
  *
  * @param trackId audio from track with this id
- * @param effect function pointer described by TrackAudioAvailableCallback
+ * @param callback function pointer described by TrackAudioAvailableCallback
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
 int soundlib_register_output_ready_callback(int trackId, TrackAudioAvailableCallback callback);
@@ -460,10 +462,18 @@ int soundlib_register_output_ready_callback(int trackId, TrackAudioAvailableCall
  * @brief Register a callback function that provides user with audio output from the master mix.
  * This audio buffer will be post any effects and volume applied.
  *
- * @param effect function pointer described by MasterAudioAvailableCallback
+ * @param callback function pointer described by MasterAudioAvailableCallback
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
 int soundlib_register_master_output_ready_callback(MasterAudioAvailableCallback callback);
+
+/**
+ * @brief Register a callback function that serves as an audio effect for a the master buffer
+ *
+ * @param effect function pointer described by MasterAudioAvailableCallback
+ * @return SoundIoErrorNone (0) on success, non-zero on failure.
+ */
+int soundlib_register_master_effect(MasterAudioAvailableCallback effect);
 
 #ifdef __cplusplus
 }

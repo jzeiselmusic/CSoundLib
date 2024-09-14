@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "streams.h"
+#include "effects.h"
 
 typedef struct _inputBuffer {
     unsigned char buffer[MAX_BUFFER_SIZE_BYTES];
@@ -34,10 +35,7 @@ typedef struct _trackObj {
     int input_channel_index;
     rmsVals current_rms_levels;
     inputBuffer input_buffer;
-
-    TrackAudioAvailableCallback* effect_list;
-    size_t num_effects;
-
+    TrackEffectList track_effects;
     TrackAudioAvailableCallback input_ready_callback;
     TrackAudioAvailableCallback output_ready_callback;
 } trackObject;

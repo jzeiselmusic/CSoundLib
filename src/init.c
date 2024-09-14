@@ -11,8 +11,6 @@
 #include "csoundlib.h"
 #include <CoreAudio/CoreAudio.h>
 
-extern audio_state* csoundlib_state;
-
 static inline void master_dummy_callback(
     unsigned char *buffer, 
     size_t length, 
@@ -69,14 +67,17 @@ int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
     struct SoundIo* soundio = soundio_create();
     
     unsigned char* mixed_output_buffer = (unsigned char*)calloc(MAX_BUFFER_SIZE_BYTES, sizeof(char));
+    MasterAudioAvailableCallback* effects = (MasterAudioAvailableCallback*)malloc(MAX_NUM_EFFECTS * sizeof(MasterAudioAvailableCallback));
     ht* hash_table = ht_create();
 
-    if (soundio && mixed_output_buffer && csoundlib_state) {
+    if (soundio && mixed_output_buffer && csoundlib_state && effects) {
         csoundlib_state->soundio = soundio;
         csoundlib_state->mixed_output_buffer = mixed_output_buffer;
         csoundlib_state->environment_initialized = true;
         csoundlib_state->track_hash_table = hash_table;
         csoundlib_state->num_tracks = 0;
+        csoundlib_state->master_effects.master_effect_list = effects;
+        csoundlib_state->master_effects.num_effects = 0;
         csoundlib_state->output_callback = &master_dummy_callback;
         int backend_err = _connectToBackend();
         int input_dev_err = soundlib_load_input_devices();
@@ -107,6 +108,8 @@ int soundlib_destroy_session() {
     soundio_destroy(csoundlib_state->soundio);
 
     free(csoundlib_state->mixed_output_buffer);
+    csoundlib_state->master_effects.num_effects = 0;
+    free(csoundlib_state->master_effects.master_effect_list);
 
     if (csoundlib_state->input_memory_allocated) {
         free(csoundlib_state->input_channel_buffers);

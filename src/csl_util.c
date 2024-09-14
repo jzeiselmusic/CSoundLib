@@ -5,8 +5,6 @@
 #include "csl_types.h"
 #include "state.h"
 
-extern audio_state* csoundlib_state;
-
 /*
 
 24 bit signed int - little endian format - stored in 32 bit buffer

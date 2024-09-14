@@ -5,6 +5,7 @@
 #include "csl_types.h"
 #include "track.h"
 #include "hash.h"
+#include "effects.h"
 
 typedef struct _audioState {
     struct SoundIo* soundio;
@@ -31,6 +32,7 @@ typedef struct _audioState {
     struct SoundIoOutStream* output_stream;
     bool output_stream_started; // should intialize to -1
     bool output_stream_initialized;
+    MasterEffectList master_effects;
     MasterAudioAvailableCallback output_callback;
 
     /* mixed inputs */
@@ -47,5 +49,7 @@ typedef struct _audioState {
     bool solo_engaged;
 
 } audio_state;
+
+extern audio_state* csoundlib_state;
 
 #endif

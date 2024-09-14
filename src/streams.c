@@ -19,6 +19,7 @@ static void _processAudioEffects();
 static void _processInputReadyCallback();
 static void _processOutputReadyCallback();
 static void _processMasterOutputReadyCallback();
+static void _processMasterEffects();
 
 extern audio_state* csoundlib_state;
 
@@ -155,6 +156,9 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
     /* now copy input buffer to output scaled by volume */
     /* note: THIS IS WHERE VOLUME SCALING HAPPENS */
     _copyInputBuffersToOutputBuffers();
+
+    /* send output buffer to effect units */
+    _processMasterEffects();
 
     /* give user the mixed output buffer */
     _processMasterOutputReadyCallback();
@@ -382,8 +386,8 @@ static void _processAudioEffects() {
     hti it = ht_iterator(csoundlib_state->track_hash_table);
     while (ht_next(&it)) {
         trackObject* track_p = (trackObject*)it.value;
-        for (int i = 0; i < track_p->num_effects; i++) {
-            track_p->effect_list[i](
+        for (int i = 0; i < track_p->track_effects.num_effects; i++) {
+            track_p->track_effects.track_effect_list[i](
                 track_p->track_id,
                 track_p->input_buffer.buffer, 
                 track_p->input_buffer.write_bytes,
@@ -433,4 +437,16 @@ static void _processMasterOutputReadyCallback() {
         csoundlib_state->sample_rate,
         csoundlib_state->num_channels_available
     );
+}
+
+static void _processMasterEffects() {
+    for (int i = 0; i < csoundlib_state->master_effects.num_effects; i++) {
+        csoundlib_state->master_effects.master_effect_list[i](
+            csoundlib_state->mixed_output_buffer,
+            csoundlib_state->mixed_output_buffer_len,
+            csoundlib_state->input_dtype.dtype,
+            csoundlib_state->sample_rate,
+            csoundlib_state->num_channels_available
+        );
+    }
 }

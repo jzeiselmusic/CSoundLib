@@ -4,6 +4,8 @@
         "audio_manipulation.h": "c",
         "tracks.h": "c",
         "algorithm": "c",
-        "soundio.h": "c"
+        "soundio.h": "c",
+        "track.h": "c",
+        "csoundlib.h": "c"
     }
 }

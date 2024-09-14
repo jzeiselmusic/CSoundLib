@@ -3,8 +3,6 @@
 #include "errors.h"
 #include "csl_util.h"
 
-extern audio_state* csoundlib_state;
-
 static inline void dummy_callback(
     int trackId,
     unsigned char *buffer, 
@@ -16,7 +14,7 @@ static inline void dummy_callback(
 
 int soundlib_add_track(int trackId) {
     trackObject* tp = malloc(sizeof(trackObject));
-    TrackAudioAvailableCallback* allocated_effects = (TrackAudioAvailableCallback*)malloc(50 * sizeof(TrackAudioAvailableCallback));
+    TrackAudioAvailableCallback* allocated_effects = (TrackAudioAvailableCallback*)malloc(MAX_NUM_EFFECTS * sizeof(TrackAudioAvailableCallback));
     trackObject track =
         {
             .track_id = trackId,
@@ -28,8 +26,8 @@ int soundlib_add_track(int trackId) {
             .current_rms_levels = {0.0, 0.0},
             .input_buffer.buffer = {0},
             .input_buffer.write_bytes = 0,
-            .effect_list = allocated_effects,
-            .num_effects = 0,
+            .track_effects.track_effect_list = allocated_effects,
+            .track_effects.num_effects = 0,
             .input_ready_callback = &dummy_callback,
             .output_ready_callback = &dummy_callback
         };
@@ -49,8 +47,8 @@ int soundlib_delete_track(int trackId) {
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
     if (track_p == NULL) return SoundIoErrorTrackNotFound;
 
-    track_p->num_effects = 0;
-    free(track_p->effect_list);
+    track_p->track_effects.num_effects = 0;
+    free(track_p->track_effects.track_effect_list);
 
     /* ht remove frees track_p */
     ht_remove(csoundlib_state->track_hash_table, key);
@@ -62,8 +60,8 @@ static int _deleteTrack(const char* key) {
     trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
     if (track_p == NULL) return SoundIoErrorTrackNotFound;
 
-    track_p->num_effects = 0;
-    free(track_p->effect_list);
+    track_p->track_effects.num_effects = 0;
+    free(track_p->track_effects.track_effect_list);
 
     /* ht remove frees track_p */
     ht_remove(csoundlib_state->track_hash_table, key);
@@ -169,38 +167,4 @@ void soundlib_delete_all_tracks(void) {
     while( ht_next(&it) ) {
         _deleteTrack(it.key);
     }
-}
-
-int soundlib_register_effect(int trackId, TrackAudioAvailableCallback effect) {
-    /* add effect to track */
-    const char key[50];
-    ht_getkey(trackId, key);
-    trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
-    track_p->effect_list[track_p->num_effects] = effect;
-    track_p->num_effects += 1;
-    return SoundIoErrorNone;
-}
-
-int soundlib_register_input_ready_callback(int trackId, TrackAudioAvailableCallback callback) {
-    const char key[50];
-    ht_getkey(trackId, key);
-    trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
-    track_p->input_ready_callback = callback;
-    return SoundIoErrorNone;
-}
-
-int soundlib_register_output_ready_callback(int trackId, TrackAudioAvailableCallback callback) {
-    const char key[50];
-    ht_getkey(trackId, key);
-    trackObject* track_p = (trackObject*)ht_get(csoundlib_state->track_hash_table, key);
-    if (track_p == NULL) return SoundIoErrorTrackNotFound;
-    track_p->output_ready_callback = callback;
-    return SoundIoErrorNone;
-}
-
-int soundlib_register_master_output_ready_callback(MasterAudioAvailableCallback callback) {
-    csoundlib_state->output_callback = callback;
-    return SoundIoErrorNone;
 }

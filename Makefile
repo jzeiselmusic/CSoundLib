@@ -4,9 +4,9 @@ CFLAGS = -std=c17 -Wno-incompatible-pointer-types-discards-qualifiers -arch arm6
 INCLUDES = -I./inc 
 
 # Source files
-SRCS = src/csl_util.c src/devices.c src/streams.c src/init.c src/state.c src/hash.c src/wav.c src/csl_types.c src/track.c
+SRCS = src/csl_util.c src/effects.c src/devices.c src/streams.c src/init.c src/state.c src/hash.c src/wav.c src/csl_types.c src/track.c
 # Object files
-OBJS = out/csl_util.o out/devices.o out/streams.o out/init.o out/state.o out/hash.o out/wav.o out/csl_types.o out/track.o
+OBJS = out/csl_util.o out/devices.o out/effects.o out/streams.o out/init.o out/state.o out/hash.o out/wav.o out/csl_types.o out/track.o
 
 out/csl_util.o: src/csl_util.c inc/csl_util.h inc/csl_types.h inc/state.h 
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
@@ -25,6 +25,8 @@ out/wav.o: src/wav.c inc/wav.h
 out/csl_types.o: src/csl_types.c inc/csl_types.h inc/state.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 out/track.o: src/track.c inc/track.h inc/state.h inc/errors.h inc/csl_util.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+out/effects.o: src/effects.c inc/csoundlib.h inc/track.h inc/state.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # Target library

@@ -12,8 +12,6 @@
 #include "state.h"
 #include "errors.h"
 
-extern audio_state* csoundlib_state;
-
 int soundlib_load_input_devices() {
     soundio_flush_events(csoundlib_state->soundio);
     int num_input_devices = soundlib_get_num_input_devices();
