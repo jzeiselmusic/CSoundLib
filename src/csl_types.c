@@ -6,6 +6,7 @@
 
 InputDtype CSL_U8_t = {
     .dtype = CSL_U8,
+    .format = SoundIoFormatU8,
     .bit_depth = 8,
     .bytes_in_buffer = 1,
     .bytes_in_sample = 1,
@@ -16,6 +17,7 @@ InputDtype CSL_U8_t = {
 
 InputDtype CSL_S8_t = {
     .dtype = CSL_S8,
+    .format = SoundIoFormatS8,
     .bit_depth = 8,
     .bytes_in_buffer = 1,
     .bytes_in_sample = 1,
@@ -26,6 +28,7 @@ InputDtype CSL_S8_t = {
 
 InputDtype CSL_U16_t = {
     .dtype = CSL_U16,
+    .format = SoundIoFormatU16LE,
     .bit_depth = 16,
     .bytes_in_buffer = 2,
     .bytes_in_sample = 2,
@@ -36,6 +39,7 @@ InputDtype CSL_U16_t = {
 
 InputDtype CSL_S16_t = {
     .dtype = CSL_S16,
+    .format = SoundIoFormatS16LE,
     .bit_depth = 8,
     .bytes_in_buffer = 2,
     .bytes_in_sample = 2,
@@ -46,6 +50,7 @@ InputDtype CSL_S16_t = {
 
 InputDtype CSL_U24_t = {
     .dtype = CSL_U24,
+    .format = SoundIoFormatU24LE,
     .bit_depth = 24,
     .bytes_in_buffer = 4,
     .bytes_in_sample = 3,
@@ -56,6 +61,7 @@ InputDtype CSL_U24_t = {
 
 InputDtype CSL_S24_t = {
     .dtype = CSL_S24,
+    .format = SoundIoFormatS24LE,
     .bit_depth = 24,
     .bytes_in_buffer = 4,
     .bytes_in_sample = 3,
@@ -66,6 +72,7 @@ InputDtype CSL_S24_t = {
 
 InputDtype CSL_U32_t = {
     .dtype = CSL_U32,
+    .format = SoundIoFormatU32LE,
     .bit_depth = 32,
     .bytes_in_buffer = 4,
     .bytes_in_sample = 4,
@@ -76,6 +83,7 @@ InputDtype CSL_U32_t = {
 
 InputDtype CSL_S32_t = {
     .dtype = CSL_S32,
+    .format = SoundIoFormatS32LE,
     .bit_depth = 32,
     .bytes_in_buffer = 4,
     .bytes_in_sample = 4,
@@ -86,6 +94,7 @@ InputDtype CSL_S32_t = {
 
 InputDtype CSL_FL32_t = {
     .dtype = CSL_FL32,
+    .format = SoundIoFormatFloat32LE,
     .bit_depth = 32,
     .bytes_in_buffer = 4,
     .bytes_in_sample = 4,

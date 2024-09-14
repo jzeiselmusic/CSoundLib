@@ -67,23 +67,10 @@ int soundlib_get_num_input_devices() {
     return soundio_input_device_count(csoundlib_state->soundio);
 }
 
-char* lib_getDefaultInputDeviceName() {
-    /* returns "" on error */
-    int device_index = soundlib_get_default_input_device_index();
-    if (device_index == -1) return emptyString;
-    return (csoundlib_state->input_devices)[device_index]->name;
-}
-
 char* soundlib_get_input_device_name(int index) {
     /* returns "" on error */
     if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
     return (csoundlib_state->input_devices)[index]->name;
-}
-
-char* lib_getInputDeviceId(int index) {
-    /* returns "" on error */
-    if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
-    return (csoundlib_state->input_devices)[index]->id;
 }
 
 int soundlib_get_num_channels_of_input_device(int index) {
@@ -92,13 +79,14 @@ int soundlib_get_num_channels_of_input_device(int index) {
     return (csoundlib_state->input_devices)[index]->current_layout.channel_count;
 }
 
-char* lib_getNameOfChannelOfInputDevice(int deviceIndex, int channelIndex) {
-    /* returns "" on error */
-    if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
-    return 
-    soundio_get_channel_name(
-        (csoundlib_state->input_devices)[deviceIndex]->current_layout.channels[channelIndex]
-    );
+int soundlib_get_num_formats_of_input_device(int deviceIndex) {
+    struct SoundIoDevice* device = soundio_get_input_device(csoundlib_state->soundio, deviceIndex);
+    return device->format_count;
+}
+
+enum SoundIoFormat* soundlib_get_formats_of_input_device(int deviceIndex) {
+    struct SoundIoDevice* device = soundio_get_input_device(csoundlib_state->soundio, deviceIndex);
+    return device->formats;
 }
 
 /********************/
@@ -153,37 +141,16 @@ int soundlib_get_num_output_devices() {
     return soundio_output_device_count(csoundlib_state->soundio);
 }
 
-char* lib_getDefaultOutputDeviceName() {
-    /* returns "" on error */
-    if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
-    int default_output_device_index = soundlib_get_default_output_device_index();
-    return (csoundlib_state->output_devices)[default_output_device_index]->name;
-}
-
 char* soundlib_get_output_device_name(int index) {
     /* returns "" on error */
     if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
     return (csoundlib_state->output_devices)[index]->name;
 }
 
-char* lib_getOutputDeviceId(int index) {
-    /* returns "" on error */
-    if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
-    return (csoundlib_state->output_devices)[index]->id;
-}
-
 int soundlib_get_num_channels_of_output_device(int index) {
     /* returns -1 on error */
     if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return -1;
     return (csoundlib_state->output_devices)[index]->current_layout.channel_count;
-}
-
-char* lib_getNameOfChannelOfOutputDevice(int deviceIndex, int channelIndex) {
-    /* returns "" on error */
-    if (_checkEnvironmentAndBackendConnected() != SoundIoErrorNone) return emptyString;
-    return soundio_get_channel_name(
-        (csoundlib_state->output_devices)[deviceIndex]->current_layout.channels[channelIndex]
-    );
 }
 
 void soundlib_get_available_input_devices(DeviceInfo* input_buffer) {
@@ -200,4 +167,14 @@ void soundlib_get_available_output_devices(DeviceInfo* input_buffer) {
         input_buffer[i].name = (csoundlib_state->output_devices)[i]->name;
         input_buffer[i].index = i;
     }
+}
+
+int soundlib_get_num_formats_of_output_device(int deviceIndex) {
+    struct SoundIoDevice* device = soundio_get_output_device(csoundlib_state->soundio, deviceIndex);
+    return device->format_count;
+}
+
+enum SoundIoFormat* soundlib_get_formats_of_output_device(int deviceIndex) {
+    struct SoundIoDevice* device = soundio_get_output_device(csoundlib_state->soundio, deviceIndex);
+    return device->formats;
 }

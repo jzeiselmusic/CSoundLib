@@ -153,43 +153,45 @@ float calculate_rms_level(const unsigned char* source, int num_bytes) {
 }
 
 float bytes_to_sample(const unsigned char* bytes) {
-    if (csoundlib_state->input_dtype.dtype == CSL_S24 || csoundlib_state->input_dtype.dtype == CSL_S32) {
+    InputDtype current_dtype = csoundlib_state->input_dtype;
+    if (current_dtype.dtype == CSL_S24 || current_dtype.dtype == CSL_S32 ||
+        current_dtype.dtype == CSL_U24 || current_dtype.dtype == CSL_U32) {
         int sample_value = (int32_t)
-                (
-                    (bytes[3] << 24) | 
-                    (bytes[2] << 16) |
-                    (bytes[1] << 8)  |
-                    (bytes[0])
-                );
+            (
+                (bytes[3] << 24) | 
+                (bytes[2] << 16) |
+                (bytes[1] << 8)  |
+                (bytes[0])
+            );
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !csoundlib_state->input_dtype.is_signed) {
-            return sample_val_float / csoundlib_state->input_dtype.max_size;
+        if (sample_val_float > 0 || !current_dtype.is_signed) {
+            return sample_val_float / current_dtype.max_size;
         }
         else {
-            return sample_val_float / csoundlib_state->input_dtype.min_size;
+            return sample_val_float / current_dtype.min_size;
         }
     }
-    else if (csoundlib_state->input_dtype.dtype == CSL_S16) {
+    else if (current_dtype.dtype == CSL_S16 || current_dtype.dtype == CSL_U16) {
         int sample_value = (int16_t)
-                (
-                    (bytes[1] << 8) | (bytes[0])
-                );
+            (
+                (bytes[1] << 8) | (bytes[0])
+            );
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !csoundlib_state->input_dtype.is_signed) {
-            return sample_val_float / csoundlib_state->input_dtype.max_size;
+        if (sample_val_float > 0 || !current_dtype.is_signed) {
+            return sample_val_float / current_dtype.max_size;
         }
         else {
-            return sample_val_float / csoundlib_state->input_dtype.min_size;
+            return sample_val_float / current_dtype.min_size;
         }
     }
-    else if (csoundlib_state->input_dtype.dtype == CSL_S8) {
+    else if (current_dtype.dtype == CSL_S8 || current_dtype.dtype == CSL_U8) {
         int sample_value = (int8_t)bytes[0];
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !csoundlib_state->input_dtype.is_signed) {
-            return sample_val_float / csoundlib_state->input_dtype.max_size;
+        if (sample_val_float > 0 || !current_dtype.is_signed) {
+            return sample_val_float / current_dtype.max_size;
         }
         else {
-            return sample_val_float / csoundlib_state->input_dtype.min_size;
+            return sample_val_float / current_dtype.min_size;
         }
     }
 }

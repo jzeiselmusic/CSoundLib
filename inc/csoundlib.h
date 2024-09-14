@@ -74,6 +74,30 @@ typedef enum {
     CSL_FL64,
 } CSL_DTYPE;
 
+/*
+enum SoundIoFormat {
+    SoundIoFormatInvalid = 0,	
+    SoundIoFormatS8 = 1,
+    SoundIoFormatU8 = 2,
+    SoundIoFormatS16LE = 3,
+    SoundIoFormatS16BE = 4,
+    SoundIoFormatU16LE = 5,
+    SoundIoFormatU16BE = 6,
+    SoundIoFormatS24LE = 7,
+    SoundIoFormatS24BE = 8,
+    SoundIoFormatU24LE = 9,
+    SoundIoFormatU24BE = 10,
+    SoundIoFormatS32LE = 11,
+    SoundIoFormatS32BE = 12,
+    SoundIoFormatU32LE = 13,
+    SoundIoFormatU32BE = 14,
+    SoundIoFormatFloat32LE = 15,
+    SoundIoFormatFloat32BE = 16,
+    SoundIoFormatFloat64LE = 17,
+    SoundIoFormatFloat64BE = 18
+}
+*/
+
 /**
  * @enum CSL_SR
  * @brief Sample rates supported by the library.
@@ -394,6 +418,23 @@ int soundlib_get_num_channels_of_input_device(int index);
  */
 void soundlib_get_available_input_devices(DeviceInfo* in_buffer);
 
+/**
+ * @brief Get number of available Sound Formats (bit depth and signedness) for this device
+ *
+ * @param deviceIndex index of the desired input device
+ * @return number of available sound formats 
+ */
+int soundlib_get_num_formats_of_input_device(int deviceIndex);
+
+/**
+ * @brief Receive all possible sound formats described by libsoundio
+ *
+ * @param deviceIndex index of the desired input device
+ * @return pointer to a list of soundioformats
+ */
+enum SoundIoFormat* soundlib_get_formats_of_input_device(int deviceIndex);
+
+
 /* functions for output devices */
 
 /**
@@ -434,6 +475,23 @@ int soundlib_get_num_channels_of_output_device(int index);
  * for total number of input devices to be returned, and pass pointer to this function.
  */
 void soundlib_get_available_output_devices(DeviceInfo* in_buffer);
+
+/**
+ * @brief Get number of available Sound Formats (bit depth and signedness) for this device
+ *
+ * @param deviceIndex index of the desired output device
+ * @return number of available sound formats 
+ */
+int soundlib_get_num_formats_of_output_device(int deviceIndex);
+
+/**
+ * @brief Receive all possible sound formats described by libsoundio
+ *
+ * @param deviceIndex index of the desired output device
+ * @return pointer to a list of soundioformats
+ */
+enum SoundIoFormat* soundlib_get_formats_of_output_device(int deviceIndex);
+
 
 /* master control */
 

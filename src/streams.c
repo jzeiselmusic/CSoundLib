@@ -205,13 +205,7 @@ static int _createInputStream(int device_index, float microphone_latency) {
     struct SoundIoDevice* input_device = csoundlib_state->input_devices[device_index];
     struct SoundIoInStream* instream = soundio_instream_create(input_device);
     if (!instream) return SoundIoErrorNoMem;
-    switch(csoundlib_state->input_dtype.dtype) {
-        case CSL_S24: instream->format = SoundIoFormatS24LE; break;
-        case CSL_S16: instream->format = SoundIoFormatS16LE; break;
-        case CSL_S32: instream->format = SoundIoFormatS32LE; break;
-        case CSL_S8: instream->format = SoundIoFormatS8; break;
-        case CSL_FL32: instream->format = SoundIoFormatFloat32NE; break;
-    }
+    instream->format = csoundlib_state->input_dtype.format;
     instream->sample_rate = get_sample_rate(csoundlib_state->sample_rate);
 
     /* use whatever the default channel layout is (take all the channels available) */
@@ -278,13 +272,7 @@ static int _createOutputStream(int device_index, float microphone_latency) {
     struct SoundIoDevice* output_device = csoundlib_state->output_devices[device_index];
     struct SoundIoOutStream* outstream = soundio_outstream_create(output_device);
     if (!outstream) return SoundIoErrorNoMem;
-    switch(csoundlib_state->input_dtype.dtype) {
-        case CSL_S24: outstream->format = SoundIoFormatS24LE; break;
-        case CSL_S16: outstream->format = SoundIoFormatS16LE; break;
-        case CSL_S32: outstream->format = SoundIoFormatS32LE; break;
-        case CSL_S8: outstream->format = SoundIoFormatS8; break;
-        case CSL_FL32: outstream->format = SoundIoFormatFloat32NE; break;
-    }
+    outstream->format = csoundlib_state->input_dtype.format;
     outstream->sample_rate = get_sample_rate(csoundlib_state->sample_rate);
     outstream->layout = output_device->current_layout;
     outstream->software_latency = microphone_latency;

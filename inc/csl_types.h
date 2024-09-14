@@ -6,8 +6,10 @@
 #include <stdlib.h>
 #include "csoundlib.h"
 
+
 typedef struct _inputDtype {
     CSL_DTYPE dtype;
+    enum SoundIoFormat format;
     uint8_t bit_depth;
     uint8_t bytes_in_buffer;
     uint8_t bytes_in_sample;

@@ -62,6 +62,10 @@ int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
         case CSL_S16: csoundlib_state->input_dtype = CSL_S16_t; break;
         case CSL_S24: csoundlib_state->input_dtype = CSL_S24_t; break;
         case CSL_S32: csoundlib_state->input_dtype = CSL_S32_t; break;
+        case CSL_U8: csoundlib_state->input_dtype = CSL_U8_t; break;
+        case CSL_U16: csoundlib_state->input_dtype = CSL_U16_t; break;
+        case CSL_U24: csoundlib_state->input_dtype = CSL_U24_t; break;
+        case CSL_U32: csoundlib_state->input_dtype = CSL_U32_t; break;
         case CSL_FL32: csoundlib_state->input_dtype = CSL_FL32_t; break;
     } 
 
@@ -201,3 +205,4 @@ static int _setGlobalOutputSampleRate(CSL_SR sample_rate) {
 
     return SoundIoErrorNone;
 }
+
