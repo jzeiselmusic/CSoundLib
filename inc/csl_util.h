@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "csl_types.h"
 
 int min_int(int a, int b);
 
@@ -15,7 +16,7 @@ void scale_audio(uint8_t *source, float volume, int num_samples);
 
 float calculate_rms_level(const unsigned char* source, int num_bytes);
 
-float bytes_to_sample(const unsigned char* bytes);
+float bytes_to_sample(const unsigned char* bytes, InputDtype data_type);
 
 float log_to_mag(float log);
 

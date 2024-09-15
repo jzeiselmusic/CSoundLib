@@ -45,8 +45,7 @@ typedef struct _inputDtype {
 #define CSL_BYTES_IN_BUFFER_24        4
 #define CSL_BYTES_IN_BUFFER_32        4
 
-#define CSL_MAX_METRONOME_BUF_SIZE    4 * 48000 * CSL_BYTES_IN_BUFFER_32
-
+InputDtype get_dtype(CSL_DTYPE in);
 size_t get_bytes_in_sample(CSL_DTYPE in);
 size_t get_bytes_in_buffer(CSL_DTYPE in);
 uint8_t get_bit_depth(CSL_DTYPE in);

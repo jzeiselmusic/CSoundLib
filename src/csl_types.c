@@ -106,6 +106,20 @@ InputDtype CSL_FL32_t = {
 /* ********************************************* */
 /* ********************************************* */
 
+InputDtype get_dtype(CSL_DTYPE in) {
+    switch(in) {
+        case CSL_U8: return CSL_U8_t; break;
+        case CSL_S8: return CSL_S8_t; break;
+        case CSL_U16: return CSL_U16_t; break;
+        case CSL_S16: return CSL_S16_t; break;
+        case CSL_U24: return CSL_U24_t; break;
+        case CSL_S24: return CSL_S24_t; break;
+        case CSL_U32: return CSL_U32_t; break;
+        case CSL_S32: return CSL_S32_t; break;
+        default: return CSL_S32_t;
+    }
+}
+
 size_t get_bytes_in_sample(CSL_DTYPE in) {
     switch(in) {
         case CSL_U8: return CSL_BYTES_IN_SAMPLE_8; break;

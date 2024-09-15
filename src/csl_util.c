@@ -145,17 +145,16 @@ float calculate_rms_level(const unsigned char* source, int num_bytes) {
     /* 4 if 24 bit or 32 bit. 2 if 16 bit. 1 if 8 bit */
     int bytes_in_buffer = csoundlib_state->input_dtype.bytes_in_buffer;
     for (int idx = 0; idx < num_bytes; idx += bytes_in_buffer) {
-        float sample = bytes_to_sample(source + idx);
+        float sample = bytes_to_sample(source + idx, csoundlib_state->input_dtype);
         rms += sample * sample;
         num_samples += 1;
     }
     return sqrt(rms / (float)num_samples);
 }
 
-float bytes_to_sample(const unsigned char* bytes) {
-    InputDtype current_dtype = csoundlib_state->input_dtype;
-    if (current_dtype.dtype == CSL_S24 || current_dtype.dtype == CSL_S32 ||
-        current_dtype.dtype == CSL_U24 || current_dtype.dtype == CSL_U32) {
+float bytes_to_sample(const unsigned char* bytes, InputDtype data_type) {
+    if (data_type.dtype == CSL_S24 || data_type.dtype == CSL_S32 ||
+        data_type.dtype == CSL_U24 || data_type.dtype == CSL_U32) {
         int sample_value = (int32_t)
             (
                 (bytes[3] << 24) | 
@@ -164,34 +163,44 @@ float bytes_to_sample(const unsigned char* bytes) {
                 (bytes[0])
             );
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !current_dtype.is_signed) {
-            return sample_val_float / current_dtype.max_size;
+        if (sample_val_float > 0 || !data_type.is_signed) {
+            return sample_val_float / data_type.max_size;
         }
         else {
-            return sample_val_float / current_dtype.min_size;
+            return sample_val_float / data_type.min_size;
         }
     }
-    else if (current_dtype.dtype == CSL_S16 || current_dtype.dtype == CSL_U16) {
+    else if (data_type.dtype == CSL_S16 || data_type.dtype == CSL_U16) {
         int sample_value = (int16_t)
             (
                 (bytes[1] << 8) | (bytes[0])
             );
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !current_dtype.is_signed) {
-            return sample_val_float / current_dtype.max_size;
+        if (sample_val_float > 0 || !data_type.is_signed) {
+            return sample_val_float / data_type.max_size;
         }
         else {
-            return sample_val_float / current_dtype.min_size;
+            return sample_val_float / data_type.min_size;
         }
     }
-    else if (current_dtype.dtype == CSL_S8 || current_dtype.dtype == CSL_U8) {
+    else if (data_type.dtype == CSL_S8 || data_type.dtype == CSL_U8) {
         int sample_value = (int8_t)bytes[0];
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !current_dtype.is_signed) {
-            return sample_val_float / current_dtype.max_size;
+        if (sample_val_float > 0 || !data_type.is_signed) {
+            return sample_val_float / data_type.max_size;
         }
         else {
-            return sample_val_float / current_dtype.min_size;
+            return sample_val_float / data_type.min_size;
         }
     }
+}
+
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t len, CSL_DTYPE data_type) {
+    int num_samples = len / get_bytes_in_buffer(data_type);
+    int i;
+    for (i = 0; i < num_samples; i++) {
+        float sample = bytes_to_sample(byte_buffer + (i * get_bytes_in_buffer(data_type)), get_dtype(data_type));
+        float_buffer[i] = sample;
+    }
+    return i;
 }

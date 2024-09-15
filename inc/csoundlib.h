@@ -550,6 +550,18 @@ int soundlib_register_master_output_ready_callback(MasterAudioAvailableCallback 
  */
 int soundlib_register_master_effect(MasterAudioAvailableCallback effect);
 
+/* utilities */
+
+/**
+ * @brief Turn a buffer of bytes into a buffer of floats
+ *
+ * @param byte_buffer input byte buffer to be transformed 
+ * @param float_buffer pointer to a user allocated array of floats, to be filled in by the function
+ * @param data_type tell the function what the data type is for converting
+ * @return number of samples in float buffer
+ */
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t len, CSL_DTYPE data_type);
+
 #ifdef __cplusplus
 }
 #endif
