@@ -5,6 +5,7 @@
  * This file contains the core API for a simple, lightweight sound library
  * that supports real-time audio processing. The library allows for session
  * management, track control, and audio I/O device management.
+ * 
  */
 #ifndef CSOUNDLIB_H
 #define CSOUNDLIB_H

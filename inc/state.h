@@ -22,7 +22,7 @@ typedef struct _audioState {
     /* input */
     struct SoundIoDevice** input_devices;
     struct SoundIoRingBuffer** input_channel_buffers; // keep a ring buffer for every channel audio
-    int num_channels_available;
+    uint8_t num_input_channels;
     struct SoundIoInStream* input_stream;
     bool input_stream_started;
     bool input_stream_written;
@@ -30,6 +30,7 @@ typedef struct _audioState {
     /* output */
     struct SoundIoDevice** output_devices;
     struct SoundIoOutStream* output_stream;
+    uint8_t num_output_channels;
     bool output_stream_started; // should intialize to -1
     bool output_stream_initialized;
     MasterEffectList master_effects;

@@ -42,7 +42,7 @@ int soundlib_load_input_devices() {
             return SoundIoErrorNoMem;
         }
         csoundlib_state->input_channel_buffers = channel_buffers;
-        csoundlib_state->num_channels_available = num_channels_of_default_input;
+        csoundlib_state->num_input_channels = num_channels_of_default_input;
     }
     return SoundIoErrorNone;
 }
@@ -98,26 +98,27 @@ enum SoundIoFormat* soundlib_get_formats_of_input_device(int deviceIndex) {
 int soundlib_load_output_devices() {
     soundio_flush_events(csoundlib_state->soundio);
     int num_output_devices = soundlib_get_num_output_devices();
+    int default_output_device_index = soundlib_get_default_output_device_index();
     if (num_output_devices > 0) {
         struct SoundIoDevice** output_devices = malloc(num_output_devices * sizeof( struct SoundIoDevice*) );
         if (!output_devices) {
             csoundlib_state->output_memory_allocated = false;
             return SoundIoErrorNoMem;
         }
-        else {
-            csoundlib_state->output_memory_allocated = true;
-            csoundlib_state->output_devices = output_devices;
-            csoundlib_state->output_stream_started = false;
-            for (int i = 0; i < num_output_devices; i++) {
-                struct SoundIoDevice* device = soundio_get_output_device(csoundlib_state->soundio, i);
-                if (!device) {
-                    return SoundIoErrorInvalid;
-                }
-                else {
-                    csoundlib_state->output_devices[i] = soundio_get_output_device(csoundlib_state->soundio, i);
-                }
+        csoundlib_state->output_memory_allocated = true;
+        csoundlib_state->output_devices = output_devices;
+        csoundlib_state->output_stream_started = false;
+        for (int i = 0; i < num_output_devices; i++) {
+            struct SoundIoDevice* device = soundio_get_output_device(csoundlib_state->soundio, i);
+            if (!device) {
+                return SoundIoErrorInvalid;
+            }
+            else {
+                csoundlib_state->output_devices[i] = soundio_get_output_device(csoundlib_state->soundio, i);
             }
         }
+        int num_channels_of_default_output = soundlib_get_num_channels_of_input_device(default_output_device_index);
+        csoundlib_state->num_output_channels = num_channels_of_default_output;
     }
     return SoundIoErrorNone;
 }

@@ -54,8 +54,8 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
     struct SoundIoRingBuffer* ring_buffer = csoundlib_state->input_channel_buffers[0];
     /* get the write ptr for this inputs ring buffer */
     int bytes_count = soundio_ring_buffer_free_count(ring_buffer);
-    int frame_count = bytes_count / BYTES_PER_FRAME_MONO; 
-    int write_frames = min_int(frame_count, frame_count_max);
+    int frame_count = bytes_count / (csoundlib_state->input_dtype.bytes_in_buffer * csoundlib_state->num_input_channels); 
+    int write_frames= min_int(frame_count, frame_count_max);
     int frames_left = write_frames;
 
     struct SoundIoChannelArea *areas;
@@ -219,7 +219,8 @@ static int _createInputStream(int device_index, float microphone_latency) {
     if (err != SoundIoErrorNone) return err;
 
     int num_channels = soundlib_get_num_channels_of_input_device(device_index);
-    csoundlib_state->num_channels_available = num_channels;
+    csoundlib_state->num_input_channels = num_channels;
+    printf("num channels available for input: %d\n", csoundlib_state->num_input_channels);
     /* reset channel buffers */
     free(csoundlib_state->input_channel_buffers);
     csoundlib_state->input_channel_buffers = malloc(num_channels * sizeof(struct SoundIoRingBuffer*));
@@ -279,6 +280,10 @@ static int _createOutputStream(int device_index, float microphone_latency) {
     outstream->write_callback = _outputStreamWriteCallback;
     outstream->underflow_callback = _underflowCallback;
 
+    int num_channels = soundlib_get_num_channels_of_output_device(device_index);
+    csoundlib_state->num_output_channels = num_channels;
+    printf("num channels available for output: %d\n", csoundlib_state->num_output_channels);
+
     csoundlib_state->output_stream = outstream;
     err = soundio_outstream_open(outstream);
     if (err != SoundIoErrorNone) return err;
@@ -311,7 +316,7 @@ int soundlib_stop_output_stream() {
 
 static void _processInputStreams(int* max_fill_samples) {
     /* copy each input stream into each track input buffer */
-    for (int channel = 0; channel < csoundlib_state->num_channels_available; channel++) {
+    for (int channel = 0; channel < csoundlib_state->num_input_channels; channel++) {
         if (csoundlib_state->input_stream_started) {
             struct SoundIoRingBuffer* ring_buffer;
             ring_buffer = csoundlib_state->input_channel_buffers[channel];
@@ -383,7 +388,7 @@ static void _processAudioEffects() {
                 track_p->input_buffer.write_bytes,
                 csoundlib_state->input_dtype.dtype,
                 csoundlib_state->sample_rate,
-                csoundlib_state->num_channels_available
+                csoundlib_state->num_input_channels
             );
         }
     }
@@ -399,7 +404,7 @@ static void _processInputReadyCallback() {
             track_p->input_buffer.write_bytes,
             csoundlib_state->input_dtype.dtype,
             csoundlib_state->sample_rate,
-            csoundlib_state->num_channels_available
+            csoundlib_state->num_input_channels
         );
     }
 }
@@ -414,7 +419,7 @@ static void _processOutputReadyCallback() {
             track_p->input_buffer.write_bytes,
             csoundlib_state->input_dtype.dtype,
             csoundlib_state->sample_rate,
-            csoundlib_state->num_channels_available
+            csoundlib_state->num_input_channels
         );
     }
 }
@@ -425,7 +430,7 @@ static void _processMasterOutputReadyCallback() {
         csoundlib_state->mixed_output_buffer_len,
         csoundlib_state->input_dtype.dtype,
         csoundlib_state->sample_rate,
-        csoundlib_state->num_channels_available
+        csoundlib_state->num_input_channels
     );
 }
 
@@ -436,7 +441,7 @@ static void _processMasterEffects() {
             csoundlib_state->mixed_output_buffer_len,
             csoundlib_state->input_dtype.dtype,
             csoundlib_state->sample_rate,
-            csoundlib_state->num_channels_available
+            csoundlib_state->num_input_channels
         );
     }
 }
