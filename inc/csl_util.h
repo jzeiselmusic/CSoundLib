@@ -8,7 +8,7 @@
 
 int min_int(int a, int b);
 
-float envelopeFollower(float input, float attack, float release, float prev_envelope);
+float envelope_follower(float input, float attack, float release, float prev_envelope);
 
 void add_and_scale_audio(const uint8_t *source, uint8_t *destination, float volume, int num_samples);
 

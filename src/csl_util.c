@@ -25,7 +25,7 @@ float mag_to_log(float mag) {
     return 20.0 * log10(mag);
 }
 
-float envelopeFollower(float input, float attack, float release, float prev_envelope) {
+float envelope_follower(float input, float attack, float release, float prev_envelope) {
     float attackAlpha = 1 - expf(-1.0 / (attack * 100.0));
     float releaseAlpha = 1 - expf(-1.0 / (release * 100.0));
 

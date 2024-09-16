@@ -562,6 +562,17 @@ int soundlib_register_master_effect(MasterAudioAvailableCallback effect);
  */
 int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t len, CSL_DTYPE data_type);
 
+/**
+ * @brief Low pass filter of the mag of a value
+ *
+ * @param input 
+ * @param attack how quickly the envelope reacts to onset changes
+ * @param release how quickly the envelope decays 
+ * @param prev_envelope continue to pass in the previous value to get the evolving envelope
+ * @return current value
+ */
+float envelope_follower(float input, float attack, float release, float prev_envelope);
+
 #ifdef __cplusplus
 }
 #endif
