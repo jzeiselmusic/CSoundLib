@@ -20,6 +20,7 @@ static void _processInputReadyCallback();
 static void _processOutputReadyCallback();
 static void _processMasterOutputReadyCallback();
 static void _processMasterEffects();
+static void _processMasterOutputVolume();
 
 extern audio_state* csoundlib_state;
 
@@ -159,6 +160,8 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
 
     /* send output buffer to effect units */
     _processMasterEffects();
+
+    _processMasterOutputVolume();
 
     /* give user the mixed output buffer */
     _processMasterOutputReadyCallback();
@@ -444,4 +447,14 @@ static void _processMasterEffects() {
             csoundlib_state->num_input_channels
         );
     }
+}
+
+static void _processMasterOutputVolume()
+{
+    add_and_scale_audio(
+        (uint8_t*)(csoundlib_state->mixed_output_buffer),
+        (uint8_t*)(csoundlib_state->mixed_output_buffer),
+        csoundlib_state->master_volume,
+        csoundlib_state->mixed_output_buffer_len / csoundlib_state->input_dtype.bytes_in_buffer
+    );
 }
