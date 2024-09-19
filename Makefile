@@ -4,7 +4,7 @@ CFLAGS = -std=c17 -Wno-incompatible-pointer-types-discards-qualifiers -arch arm6
 INCLUDES = -I./inc 
 
 DYNAMIC_CFLAGS = -fPIC
-DYNAMIC_LDFLAGS = -dynamiclib -framework CoreAudio -framework AudioToolbox -framework CoreFoundation
+DYNAMIC_LDFLAGS = -framework CoreAudio -framework AudioToolbox -framework CoreFoundation -dynamiclib 
 
 BUILT_STATIC = false
 BUILT_DYNAMIC = false
@@ -51,6 +51,10 @@ dynamic: outdir $(DYNAMIC_TARGET)
 
 outdir:
 	mkdir -p out
+
+# this rule means that if you want to build with libcsoundlib you need all the frameworks used 
+# in libsoundio - coreaudio, audiotoolbox, etc. This is probably worse than in you just needed to 
+# download libsoundio to /usr/local/lib in order to build 
 
 # Rule to create the static library
 $(STATIC_TARGET): $(OBJS)
