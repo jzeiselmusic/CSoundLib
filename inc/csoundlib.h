@@ -16,7 +16,6 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <soundio/soundio.h>
 
 #define MAX_NUM_EFFECTS                           50
 
@@ -427,15 +426,6 @@ void soundlib_get_available_input_devices(DeviceInfo* in_buffer);
  */
 int soundlib_get_num_formats_of_input_device(int deviceIndex);
 
-/**
- * @brief Receive all possible sound formats described by libsoundio
- *
- * @param deviceIndex index of the desired input device
- * @return pointer to a list of soundioformats
- */
-enum SoundIoFormat* soundlib_get_formats_of_input_device(int deviceIndex);
-
-
 /* functions for output devices */
 
 /**
@@ -484,15 +474,6 @@ void soundlib_get_available_output_devices(DeviceInfo* in_buffer);
  * @return number of available sound formats 
  */
 int soundlib_get_num_formats_of_output_device(int deviceIndex);
-
-/**
- * @brief Receive all possible sound formats described by libsoundio
- *
- * @param deviceIndex index of the desired output device
- * @return pointer to a list of soundioformats
- */
-enum SoundIoFormat* soundlib_get_formats_of_output_device(int deviceIndex);
-
 
 /* master control */
 

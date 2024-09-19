@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "csoundlib.h"
+#include <soundio/soundio.h>
 
 
 typedef struct _inputDtype {

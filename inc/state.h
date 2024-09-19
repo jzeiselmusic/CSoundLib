@@ -6,6 +6,7 @@
 #include "track.h"
 #include "hash.h"
 #include "effects.h"
+#include <soundio/soundio.h>
 
 typedef struct _audioState {
     struct SoundIo* soundio;

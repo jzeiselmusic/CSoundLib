@@ -50,5 +50,6 @@ clean:
 
 install:
 	mv out/$(STATIC_TARGET) /usr/local/lib/$(STATIC_TARGET)
+	cp inc/csoundlib.h /usr/local/include/csoundlib.h
 
 .PHONY: all clean

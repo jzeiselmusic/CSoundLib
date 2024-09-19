@@ -1,6 +1,7 @@
 
 #include "csl_types.h"
 #include "state.h"
+#include <soundio/soundio.h>
 
 /* ready to use structs for input data types */
 

@@ -3,6 +3,4 @@
 
 #include "csoundlib.h"
 
-
-
 #endif
