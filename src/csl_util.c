@@ -195,8 +195,9 @@ float bytes_to_sample(const unsigned char* bytes, InputDtype data_type) {
     }
 }
 
-int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t len, CSL_DTYPE data_type) {
-    int num_samples = len / get_bytes_in_buffer(data_type);
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t byte_len, size_t input_max_samples, CSL_DTYPE data_type) {
+    int num_samples = byte_len / get_bytes_in_buffer(data_type);
+    if (num_samples > input_max_samples) num_samples = input_max_samples;
     int i;
     for (i = 0; i < num_samples; i++) {
         float sample = bytes_to_sample(byte_buffer + (i * get_bytes_in_buffer(data_type)), get_dtype(data_type));

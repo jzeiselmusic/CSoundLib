@@ -223,7 +223,6 @@ static int _createInputStream(int device_index, float microphone_latency) {
 
     int num_channels = soundlib_get_num_channels_of_input_device(device_index);
     csoundlib_state->num_input_channels = num_channels;
-    printf("num channels available for input: %d\n", csoundlib_state->num_input_channels);
     /* reset channel buffers */
     free(csoundlib_state->input_channel_buffers);
     csoundlib_state->input_channel_buffers = malloc(num_channels * sizeof(struct SoundIoRingBuffer*));
@@ -285,8 +284,6 @@ static int _createOutputStream(int device_index, float microphone_latency) {
 
     int num_channels = soundlib_get_num_channels_of_output_device(device_index);
     csoundlib_state->num_output_channels = num_channels;
-    printf("num channels available for output: %d\n", csoundlib_state->num_output_channels);
-
     csoundlib_state->output_stream = outstream;
     err = soundio_outstream_open(outstream);
     if (err != SoundIoErrorNone) return err;

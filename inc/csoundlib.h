@@ -541,7 +541,7 @@ int soundlib_register_master_effect(MasterAudioAvailableCallback effect);
  * @param data_type tell the function what the data type is for converting
  * @return number of samples in float buffer
  */
-int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t len, CSL_DTYPE data_type);
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t byte_len, size_t input_max_samples, CSL_DTYPE data_type);
 
 /**
  * @brief Low pass filter of the mag of a value

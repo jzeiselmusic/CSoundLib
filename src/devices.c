@@ -11,6 +11,7 @@
 #include "init.h"
 #include "state.h"
 #include "errors.h"
+#include <soundio/soundio.h>
 
 int soundlib_load_input_devices() {
     soundio_flush_events(csoundlib_state->soundio);
