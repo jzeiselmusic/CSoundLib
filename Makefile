@@ -4,7 +4,7 @@ CFLAGS = -std=c17 -Wno-incompatible-pointer-types-discards-qualifiers -arch arm6
 INCLUDES = -I./inc 
 
 DYNAMIC_CFLAGS = -fPIC
-DYNAMIC_LDFLAGS = -framework CoreAudio -framework AudioToolbox -framework CoreFoundation -dynamiclib 
+DYNAMIC_LDFLAGS = -framework CoreAudio -framework AudioToolbox -framework CoreFoundation -dynamiclib -install_name @rpath/libcsoundlib.dylib
 
 BUILT_STATIC = false
 BUILT_DYNAMIC = false
@@ -67,6 +67,7 @@ $(STATIC_TARGET): $(OBJS)
 $(DYNAMIC_TARGET): $(OBJS)
 	$(CC) -arch arm64 $(DYNAMIC_LDFLAGS) -o out/$(DYNAMIC_TARGET) -L/usr/local/lib -lsoundio $(OBJS)
 	rm out/*.o
+	install_name_tool -id @rpath/libcsoundlib.dylib /usr/local/lib/libcsoundlib.dylib
 	@$(eval BUILT_DYNAMIC=true)
 
 # Clean rule to remove object files
