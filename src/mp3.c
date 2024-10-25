@@ -78,8 +78,9 @@ void open_mp3_file(const char *path, CslFileInfo* info) {
                     input_buffer_size = av_samples_alloc(&input_buffer, NULL, 2, input_samples, AV_SAMPLE_FMT_S32, 0);
                     int converted_samples = swr_convert(swr_ctx, &input_buffer, input_samples, 
                                                         (const uint8_t **)frame->extended_data, frame->nb_samples);
+                    memcpy(info->data + (total_frames * 4), input_buffer, converted_samples * 4);
                     int converted_buffer_size = av_samples_get_buffer_size(NULL, 2, converted_samples, AV_SAMPLE_FMT_S32, 0);
-                    total_frames += (converted_buffer_size / (2 * 4)); // 2 for channels and 4 for bytes in 32b sample
+                    total_frames += (converted_samples / (2 * 4)); // 2 for channels and 4 for bytes in 32b sample
                     av_freep(&input_buffer);
                 }
             }

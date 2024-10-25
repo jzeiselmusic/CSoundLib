@@ -152,6 +152,73 @@ float calculate_rms_level(const unsigned char* source, int num_bytes) {
     return sqrt(rms / (float)num_samples);
 }
 
+float bytes_to_sample_audio_file(const unsigned char* bytes, CslDataType data_type) {
+    if (data_type == CSL_S24 || data_type == CSL_U24) {
+        // Combine bytes into a 24-bit integer
+        int sample_value =  
+            (bytes[2] << 16) | 
+            (bytes[1] << 8)  | 
+            (bytes[0]);
+
+        // Perform sign extension for signed 24-bit data
+        if (data_type == CSL_S24 && (sample_value & 0x800000)) { 
+            sample_value |= 0xFF000000; // Sign extend to 32 bits if negative
+        }
+
+        // Convert to float and scale
+        float sample_val_float = (float)sample_value;
+        float max_value = get_max_value(data_type);
+        float min_value = get_min_value(data_type);
+
+        if (!is_signed_type(data_type)) {
+            return sample_val_float / max_value; // Unsigned: scale by max
+        } else if (sample_val_float >= 0) {
+            return sample_val_float / max_value; // Signed positive
+        } else {
+            return sample_val_float / min_value; // Signed negative
+        }
+    }
+    if (data_type == CSL_S32 || data_type == CSL_U32) {
+        int sample_value = (int32_t)
+            (
+                (bytes[3] << 24) | 
+                (bytes[2] << 16) |
+                (bytes[1] << 8)  |
+                (bytes[0])
+            );
+        float sample_val_float = (float)sample_value;
+        if (sample_val_float > 0 || !is_signed_type(data_type)) {
+            return sample_val_float / get_max_value(data_type);
+        }
+        else {
+            return sample_val_float / get_min_value(data_type);
+        }
+    }
+    else if (data_type == CSL_S16 || data_type == CSL_U16) {
+        int sample_value = (int16_t)
+            (
+                (bytes[1] << 8) | (bytes[0])
+            );
+        float sample_val_float = (float)sample_value;
+        if (sample_val_float > 0 || !is_signed_type(data_type)) {
+            return sample_val_float / get_max_value(data_type);
+        }
+        else {
+            return sample_val_float / get_min_value(data_type);
+        }
+    }
+    else if (data_type == CSL_S8 || data_type == CSL_U8) {
+        int sample_value = (int8_t)bytes[0];
+        float sample_val_float = (float)sample_value;
+        if (sample_val_float > 0 || !is_signed_type(data_type)) {
+            return sample_val_float / get_max_value(data_type);
+        }
+        else {
+            return sample_val_float / get_min_value(data_type);
+        }
+    }
+}
+
 float bytes_to_sample(const unsigned char* bytes, CslDataType data_type) {
     if (data_type == CSL_S24 || data_type == CSL_S32 ||
         data_type == CSL_U24 || data_type == CSL_U32) {
@@ -195,12 +262,26 @@ float bytes_to_sample(const unsigned char* bytes, CslDataType data_type) {
     }
 }
 
-int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type) {
-    int num_samples = num_bytes / get_bytes_in_buffer(data_type);
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type, bool audio_file) {
+    int bytes_in_buffer;
+    if (audio_file) {
+        if (data_type == CSL_S24 || data_type == CSL_U24) {
+            bytes_in_buffer = 3;
+        }
+        else {
+            bytes_in_buffer = get_bytes_in_buffer(data_type);
+        }
+    }
+    else {
+        bytes_in_buffer = get_bytes_in_buffer(data_type);
+    }
+    int num_samples = num_bytes / bytes_in_buffer;
     if (num_samples > input_max_samples) num_samples = input_max_samples;
     int i;
     for (i = 0; i < num_samples; i++) {
-        float sample = bytes_to_sample(byte_buffer + (i * get_bytes_in_buffer(data_type)), data_type);
+        float sample;
+        if (!audio_file) sample = bytes_to_sample(byte_buffer + (i * bytes_in_buffer), data_type);
+        else sample = bytes_to_sample_audio_file(byte_buffer + (i * bytes_in_buffer), data_type);
         float_buffer[i] = sample;
     }
     return i;

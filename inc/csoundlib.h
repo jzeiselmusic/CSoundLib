@@ -17,6 +17,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define MAX_NUM_EFFECTS                           50
 #define MAX_AUDIO_FILE_SIZE_BYTES                 460800000
@@ -576,6 +577,7 @@ void open_mp3_file(const char *path, CslFileInfo* info);
 
 /* utilities */
 
+float bytes_to_sample_audio_file(const unsigned char* bytes, CslDataType data_type);
 float bytes_to_sample(const unsigned char* bytes, CslDataType data_type);
 
 /**
@@ -586,7 +588,7 @@ float bytes_to_sample(const unsigned char* bytes, CslDataType data_type);
  * @param data_type tell the function what the data type is for converting
  * @return number of samples in float buffer
  */
-int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type);
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type, bool audio_file);
 
 /**
  * @brief Low pass filter of the mag of a value
