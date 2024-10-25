@@ -16,8 +16,6 @@ void scale_audio(uint8_t *source, float volume, int num_samples);
 
 float calculate_rms_level(const unsigned char* source, int num_bytes);
 
-float bytes_to_sample(const unsigned char* bytes, InputDtype data_type);
-
 float log_to_mag(float log);
 
 float mag_to_log(float mag);

@@ -10,9 +10,9 @@ BUILT_STATIC = false
 BUILT_DYNAMIC = false
 
 # Source files
-SRCS = src/csl_util.c src/effects.c src/devices.c src/streams.c src/init.c src/state.c src/hash.c src/wav.c src/csl_types.c src/track.c src/pocketfft.c
+SRCS = src/csl_util.c src/effects.c src/devices.c src/streams.c src/init.c src/state.c src/hash.c src/wav.c src/mp3.c src/csl_types.c src/track.c src/pocketfft.c
 # Object files
-OBJS = out/csl_util.o out/devices.o out/effects.o out/streams.o out/init.o out/state.o out/hash.o out/wav.o out/csl_types.o out/track.o out/pocketfft.o
+OBJS = out/csl_util.o out/devices.o out/effects.o out/streams.o out/init.o out/state.o out/hash.o out/wav.o out/mp3.o out/csl_types.o out/track.o out/pocketfft.o
 
 out/csl_util.o: src/csl_util.c inc/csl_util.h inc/csl_types.h inc/state.h 
 	$(CC) $(CFLAGS) $(DYNAMIC_CFLAGS) $(INCLUDES) -c $< -o $@
@@ -27,6 +27,8 @@ out/state.o: src/state.c inc/state.h inc/csoundlib.h
 out/hash.o: src/hash.c inc/hash.h
 	$(CC) $(CFLAGS) $(DYNAMIC_CFLAGS) $(INCLUDES) -c $< -o $@
 out/wav.o: src/wav.c inc/wav.h 
+	$(CC) $(CFLAGS) $(DYNAMIC_CFLAGS) $(INCLUDES) -c $< -o $@
+out/mp3.o: src/mp3.c inc/mp3.h inc/csoundlib.h
 	$(CC) $(CFLAGS) $(DYNAMIC_CFLAGS) $(INCLUDES) -c $< -o $@
 out/csl_types.o: src/csl_types.c inc/csl_types.h inc/state.h
 	$(CC) $(CFLAGS) $(DYNAMIC_CFLAGS) $(INCLUDES) -c $< -o $@
@@ -58,14 +60,14 @@ outdir:
 
 # Rule to create the static library
 $(STATIC_TARGET): $(OBJS)
-	mkdir temp && cd temp && ar x /usr/local/lib/libsoundio.a
+	mkdir temp && cd temp && ar x /usr/local/lib/libsoundio.a && ar x /usr/local/lib/libswresample.a && ar x /usr/local/lib/libavformat.a && ar x /usr/local/lib/libavutil.a && ar x /usr/local/lib/libavcodec.a
 	cd ..
 	ar rcs out/$@ $(OBJS) temp/*.o
 	rm -rf temp
 	@$(eval BUILT_STATIC=true)
 
 $(DYNAMIC_TARGET): $(OBJS)
-	$(CC) -arch arm64 $(DYNAMIC_LDFLAGS) -o out/$(DYNAMIC_TARGET) -L/usr/local/lib -lsoundio $(OBJS)
+	$(CC) -arch arm64 $(DYNAMIC_LDFLAGS) -o out/$(DYNAMIC_TARGET) -L/usr/local/lib -lsoundio -lavcodec -lavformat -lavutil -lswresample $(OBJS)
 	rm out/*.o
 	install_name_tool -id @rpath/libcsoundlib.dylib /usr/local/lib/libcsoundlib.dylib
 	@$(eval BUILT_DYNAMIC=true)

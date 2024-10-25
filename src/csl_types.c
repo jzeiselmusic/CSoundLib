@@ -107,7 +107,7 @@ InputDtype CSL_FL32_t = {
 /* ********************************************* */
 /* ********************************************* */
 
-InputDtype get_dtype(CSL_DTYPE in) {
+InputDtype get_dtype(CslDataType in) {
     switch(in) {
         case CSL_U8: return CSL_U8_t; break;
         case CSL_S8: return CSL_S8_t; break;
@@ -121,7 +121,7 @@ InputDtype get_dtype(CSL_DTYPE in) {
     }
 }
 
-size_t get_bytes_in_sample(CSL_DTYPE in) {
+size_t get_bytes_in_sample(CslDataType in) {
     switch(in) {
         case CSL_U8: return CSL_BYTES_IN_SAMPLE_8; break;
         case CSL_S8: return CSL_BYTES_IN_SAMPLE_8; break;
@@ -135,7 +135,7 @@ size_t get_bytes_in_sample(CSL_DTYPE in) {
     }
 }
 
-size_t get_bytes_in_buffer(CSL_DTYPE in) {
+size_t get_bytes_in_buffer(CslDataType in) {
     switch(in) {
         case CSL_U8: return CSL_BYTES_IN_BUFFER_8; break;
         case CSL_S8: return CSL_BYTES_IN_BUFFER_8; break;
@@ -149,7 +149,7 @@ size_t get_bytes_in_buffer(CSL_DTYPE in) {
     }
 }
 
-uint8_t get_bit_depth(CSL_DTYPE in) {
+uint8_t get_bit_depth(CslDataType in) {
     switch(in) {
         case CSL_U8: return 8; break;
         case CSL_S8: return 8; break;
@@ -163,7 +163,7 @@ uint8_t get_bit_depth(CSL_DTYPE in) {
     }
 }
 
-int32_t get_max_value(CSL_DTYPE in) {
+int32_t get_max_value(CslDataType in) {
     switch(in) {
         case CSL_U8: return CSL_U8_MAX; break;
         case CSL_S8: return CSL_S8_MAX; break;
@@ -177,7 +177,7 @@ int32_t get_max_value(CSL_DTYPE in) {
     }
 }
 
-int32_t get_min_value(CSL_DTYPE in) {
+int32_t get_min_value(CslDataType in) {
     switch(in) {
         case CSL_S8: return CSL_S8_MIN; break;
         case CSL_S16: return CSL_S16_MIN; break;
@@ -187,7 +187,7 @@ int32_t get_min_value(CSL_DTYPE in) {
     }
 }
 
-bool is_signed_type(CSL_DTYPE in) {
+bool is_signed_type(CslDataType in) {
     switch(in) {
         case CSL_U8: return false; break;
         case CSL_S8: return true; break;
@@ -201,9 +201,9 @@ bool is_signed_type(CSL_DTYPE in) {
     }
 }
 
-int get_sample_rate(CSL_SR in) {
+int get_sample_rate(CslSampleRate in) {
     switch(in) {
-        case SR44100: return 44100; break;
-        case SR48000: return 48000; break;
+        case CSL_SR44100: return 44100; break;
+        case CSL_SR48000: return 48000; break;
     }
 }

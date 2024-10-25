@@ -10,7 +10,7 @@
 
 typedef struct _audioState {
     struct SoundIo* soundio;
-    CSL_SR sample_rate; 
+    CslSampleRate sample_rate; 
     InputDtype input_dtype;
     float master_volume; // 0.0 -> 1.0 (parity)
 

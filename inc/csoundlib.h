@@ -16,8 +16,10 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define MAX_NUM_EFFECTS                           50
+#define MAX_AUDIO_FILE_SIZE_BYTES                 460800000
 
 /* errors.h */
 /* 
@@ -53,9 +55,10 @@ extern "C" {
 #define CSLErrorLoadingInputDevices               28
 #define CSLErrorLoadingOutputDevices              29
 #define CSLErrorSettingSampleRate                 30
+#define CSLErrorSettingBitDepth                   31
 
 /**
- * @enum CSL_DTYPE
+ * @enum CslDataType
  * @brief Data types supported by the library.
  *
  * CSL types represent unsigned and signed integers of different sizes, as well as
@@ -72,7 +75,7 @@ typedef enum {
     CSL_S24,
     CSL_FL32,
     CSL_FL64,
-} CSL_DTYPE;
+} CslDataType;
 
 /*
 enum SoundIoFormat {
@@ -99,16 +102,26 @@ enum SoundIoFormat {
 */
 
 /**
- * @enum CSL_SR
+ * @enum CslSampleRate
  * @brief Sample rates supported by the library.
  *
  * defines the sample rates for audio processing. Currently, it 
  * supports only 44.1 kHz and 48 kHz.
  */
 typedef enum {
-    SR44100,
-    SR48000
-} CSL_SR;
+    CSL_SR44100,
+    CSL_SR48000
+} CslSampleRate;
+
+/**
+ * @enum CslFileType
+ * @brief file types supported by the library.
+ *
+ */
+typedef enum {
+    CSL_WAV,
+    CSL_MP3
+} CslFileType;
 
 /**
  * @typedef TrackAudioAvailableCallback
@@ -125,16 +138,16 @@ typedef enum {
  * @param trackId The ID of the track.
  * @param buffer The buffer containing the audio data.
  * @param length The length of the buffer.
- * @param data_type The type of audio data (from CSL_DTYPE).
- * @param sample_rate The sample rate of the audio (from CSL_SR).
+ * @param data_type The type of audio data (from CslDataType).
+ * @param sample_rate The sample rate of the audio (from CslSampleRate).
  * @param num_channels The number of audio channels.
  */
 typedef void (*TrackAudioAvailableCallback) (
     int trackId,
     unsigned char *buffer, 
     size_t length, 
-    CSL_DTYPE data_type, 
-    CSL_SR sample_rate, 
+    CslDataType data_type, 
+    CslSampleRate sample_rate, 
     size_t num_channels
 );
 
@@ -147,20 +160,20 @@ typedef void (*TrackAudioAvailableCallback) (
  * 
  * @param buffer The buffer containing the audio data.
  * @param length The length of the buffer.
- * @param data_type The type of audio data (from CSL_DTYPE).
- * @param sample_rate The sample rate of the audio (from CSL_SR).
+ * @param data_type The type of audio data (from CslDataType).
+ * @param sample_rate The sample rate of the audio (from CslSampleRate).
  * @param num_channels The number of audio channels.
  */
 typedef void (*MasterAudioAvailableCallback) (
     unsigned char *buffer,
     size_t length,
-    CSL_DTYPE data_type,
-    CSL_SR sample_rate,
+    CslDataType data_type,
+    CslSampleRate sample_rate,
     size_t num_channels
 );
 
 /**
- * @struct DeviceInfo
+ * @struct CslDeviceInfo
  * @brief Represents an audio input or output device.
  *
  * Basic information about an audio device.
@@ -169,7 +182,22 @@ typedef void (*MasterAudioAvailableCallback) (
 typedef struct {
     char* name;
     int index;
-} DeviceInfo;
+} CslDeviceInfo;
+
+/**
+ * @struct CslFileInfo
+ * @brief Represents info about an audio file
+ * 
+ */
+typedef struct {
+    CslDataType data_type;
+    CslSampleRate sample_rate;
+    CslFileType file_type;
+    const char* path;
+    int num_frames;
+    int num_channels;
+    unsigned char* data; // max size is 10 min of 48k 64 bit audio
+} CslFileInfo;
 
 
 /**
@@ -179,11 +207,11 @@ typedef struct {
  * and data type. It must be called before any other sound processing 
  * functions.
  *
- * @param sample_rate The desired sample rate (from CSL_SR).
- * @param data_type The data type for audio processing (from CSL_DTYPE).
+ * @param sample_rate The desired sample rate (from CslSampleRate).
+ * @param data_type The data type for audio processing (from CslDataType).
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
-int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type);
+int soundlib_start_session(CslSampleRate sample_rate, CslDataType data_type);
 
 /**
  * @brief Stops and cleans up the current sound session.
@@ -347,6 +375,7 @@ int soundlib_start_input_stream(int deviceIndex, float microphone_latency);
 
 /**
  * @brief Stop whatever input stream has been started
+ * always make sure to call stop output stream before input stream
  *
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
@@ -365,6 +394,7 @@ int soundlib_start_output_stream(int deviceIndex, float microphone_latency);
 
 /**
  * @brief Stop whatever output stream has been started
+ * always make sure to call stop output stream before input stream
  *
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
@@ -412,11 +442,11 @@ int soundlib_get_num_channels_of_input_device(int index);
 /**
  * @brief Receive information about available input devices
  *
- * @param in_buffer A pointer to allocated memory of DeviceInfo structs
- * @return Populate a list of DeviceInfo structs. User must preallocate space 
+ * @param in_buffer A pointer to allocated memory of CslDeviceInfo structs
+ * @return Populate a list of CslDeviceInfo structs. User must preallocate space 
  * for total number of input devices to be returned, and pass pointer to this function.
  */
-void soundlib_get_available_input_devices(DeviceInfo* in_buffer);
+void soundlib_get_available_input_devices(CslDeviceInfo* in_buffer);
 
 /**
  * @brief Get number of available Sound Formats (bit depth and signedness) for this device
@@ -461,11 +491,11 @@ int soundlib_get_num_channels_of_output_device(int index);
 /**
  * @brief Receive information about available input devices
  *
- * @param in_buffer A pointer to allocated memory of DeviceInfo structs
- * @return Populate a list of DeviceInfo structs. User must preallocate space 
+ * @param in_buffer A pointer to allocated memory of CslDeviceInfo structs
+ * @return Populate a list of CslDeviceInfo structs. User must preallocate space 
  * for total number of input devices to be returned, and pass pointer to this function.
  */
-void soundlib_get_available_output_devices(DeviceInfo* in_buffer);
+void soundlib_get_available_output_devices(CslDeviceInfo* in_buffer);
 
 /**
  * @brief Get number of available Sound Formats (bit depth and signedness) for this device
@@ -531,7 +561,22 @@ int soundlib_register_master_output_ready_callback(MasterAudioAvailableCallback 
  */
 int soundlib_register_master_effect(MasterAudioAvailableCallback effect);
 
+/* audio file functions */
+
+/**
+ * @brief open a wav file and return info about it for the user 
+ *
+ * @param path string of the wav file path
+ * @param info CslFileInfo struct to be populated by this function
+ * @return SoundIoErrorNone (0) on success, non-zero on failure.
+ */
+int open_wav_file(const char* path, CslFileInfo* info);
+
+void open_mp3_file(const char *path, CslFileInfo* info);
+
 /* utilities */
+
+float bytes_to_sample(const unsigned char* bytes, CslDataType data_type);
 
 /**
  * @brief Turn a buffer of bytes into a buffer of floats
@@ -541,7 +586,7 @@ int soundlib_register_master_effect(MasterAudioAvailableCallback effect);
  * @param data_type tell the function what the data type is for converting
  * @return number of samples in float buffer
  */
-int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t byte_len, size_t input_max_samples, CSL_DTYPE data_type);
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type);
 
 /**
  * @brief Low pass filter of the mag of a value

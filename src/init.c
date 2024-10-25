@@ -14,15 +14,15 @@
 static inline void master_dummy_callback(
     unsigned char *buffer, 
     size_t length, 
-    CSL_DTYPE data_type, 
-    CSL_SR sample_rate, 
+    CslDataType data_type, 
+    CslSampleRate sample_rate, 
     size_t num_channels   
 ) {};
 
 static int _connectToBackend();
 static void _deallocateAllMemory();
-static int _setGlobalInputSampleRate(CSL_SR sample_rate);
-static int _setGlobalOutputSampleRate(CSL_SR sample_rate);
+static int _setGlobalInputSampleRate(CslSampleRate sample_rate);
+static int _setGlobalOutputSampleRate(CslSampleRate sample_rate);
 
 static int _connectToBackend() {
     int ret = soundio_connect(csoundlib_state->soundio);
@@ -44,7 +44,7 @@ static void _deallocateAllMemory() {
     free(csoundlib_state);
 }
 
-int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
+int soundlib_start_session(CslSampleRate sample_rate, CslDataType data_type) {
     int err;
     csoundlib_state = malloc( sizeof(audio_state) );
 
@@ -105,11 +105,15 @@ int soundlib_start_session(CSL_SR sample_rate, CSL_DTYPE data_type) {
 }
 
 int soundlib_destroy_session() {
-    int ret = soundlib_stop_output_stream();
-    ret = soundlib_stop_input_stream();
+    soundio_flush_events(csoundlib_state->soundio);
+    if (csoundlib_state->output_stream_started) {
+        soundlib_stop_output_stream();
+    } 
+    if (csoundlib_state->input_stream_started) {
+        soundlib_stop_input_stream();
+    }
     cleanup_input_devices();
     cleanup_output_devices();
-    soundio_flush_events(csoundlib_state->soundio);
     soundio_destroy(csoundlib_state->soundio);
 
     free(csoundlib_state->mixed_output_buffer);
@@ -148,7 +152,7 @@ int _checkEnvironmentAndBackendConnected() {
     return SoundIoErrorNone;
 }
 
-static int _setGlobalInputSampleRate(CSL_SR sample_rate) {
+static int _setGlobalInputSampleRate(CslSampleRate sample_rate) {
     AudioObjectPropertyAddress property = {
         kAudioHardwarePropertyDefaultInputDevice,
         kAudioObjectPropertyScopeGlobal,
@@ -177,7 +181,7 @@ static int _setGlobalInputSampleRate(CSL_SR sample_rate) {
     return SoundIoErrorNone;
 }
 
-static int _setGlobalOutputSampleRate(CSL_SR sample_rate) {
+static int _setGlobalOutputSampleRate(CslSampleRate sample_rate) {
     AudioObjectPropertyAddress property = {
         kAudioHardwarePropertyDefaultOutputDevice,
         kAudioObjectPropertyScopeGlobal,

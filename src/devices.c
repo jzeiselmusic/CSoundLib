@@ -51,7 +51,7 @@ int soundlib_load_input_devices() {
 void cleanup_input_devices() {
     int num_input_devices = soundlib_get_num_input_devices();
     for (int i = 0; i < num_input_devices; i++) {
-        soundio_device_unref(csoundlib_state->output_devices[i]);
+        // soundio_device_unref(csoundlib_state->output_devices[i]);
     }
 }
 
@@ -127,7 +127,7 @@ int soundlib_load_output_devices() {
 void cleanup_output_devices() {
     int num_output_devices = soundlib_get_num_output_devices();
     for (int i = 0; i < num_output_devices; i++) {
-        soundio_device_unref(csoundlib_state->output_devices[i]);
+        // soundio_device_unref(csoundlib_state->output_devices[i]);
     }
 }
 
@@ -155,7 +155,7 @@ int soundlib_get_num_channels_of_output_device(int index) {
     return (csoundlib_state->output_devices)[index]->current_layout.channel_count;
 }
 
-void soundlib_get_available_input_devices(DeviceInfo* input_buffer) {
+void soundlib_get_available_input_devices(CslDeviceInfo* input_buffer) {
     int num_input_devices = soundio_input_device_count(csoundlib_state->soundio);
     for (int i = 0; i < num_input_devices; i++) {
         input_buffer[i].name = (csoundlib_state->input_devices)[i]->name;
@@ -163,7 +163,7 @@ void soundlib_get_available_input_devices(DeviceInfo* input_buffer) {
     }
 }
 
-void soundlib_get_available_output_devices(DeviceInfo* input_buffer) {
+void soundlib_get_available_output_devices(CslDeviceInfo* input_buffer) {
     int num_output_devices = soundio_output_device_count(csoundlib_state->soundio);
     for (int i = 0; i < num_output_devices; i++) {
         input_buffer[i].name = (csoundlib_state->output_devices)[i]->name;

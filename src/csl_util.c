@@ -39,7 +39,7 @@ float envelope_follower(float input, float attack, float release, float prev_env
 }
 
 void add_and_scale_audio(const uint8_t *source, uint8_t *destination, float volume, int num_samples) {
-    CSL_DTYPE dtype = csoundlib_state->input_dtype.dtype;
+    CslDataType dtype = csoundlib_state->input_dtype.dtype;
     uint8_t bytes_in_buffer = get_bytes_in_buffer(dtype);
     uint8_t bytes_in_sample = get_bytes_in_sample(dtype);
     for (int i = 0; i < num_samples; i++) {
@@ -92,7 +92,7 @@ void add_and_scale_audio(const uint8_t *source, uint8_t *destination, float volu
 }
 
 void scale_audio(uint8_t *source, float volume, int num_samples) {
-    CSL_DTYPE dtype = csoundlib_state->input_dtype.dtype;
+    CslDataType dtype = csoundlib_state->input_dtype.dtype;
     uint8_t bytes_in_buffer = get_bytes_in_buffer(dtype);
     uint8_t bytes_in_sample = get_bytes_in_sample(dtype);
     for (int i = 0; i < num_samples; i++) {
@@ -145,16 +145,16 @@ float calculate_rms_level(const unsigned char* source, int num_bytes) {
     /* 4 if 24 bit or 32 bit. 2 if 16 bit. 1 if 8 bit */
     int bytes_in_buffer = csoundlib_state->input_dtype.bytes_in_buffer;
     for (int idx = 0; idx < num_bytes; idx += bytes_in_buffer) {
-        float sample = bytes_to_sample(source + idx, csoundlib_state->input_dtype);
+        float sample = bytes_to_sample(source + idx, csoundlib_state->input_dtype.dtype);
         rms += sample * sample;
         num_samples += 1;
     }
     return sqrt(rms / (float)num_samples);
 }
 
-float bytes_to_sample(const unsigned char* bytes, InputDtype data_type) {
-    if (data_type.dtype == CSL_S24 || data_type.dtype == CSL_S32 ||
-        data_type.dtype == CSL_U24 || data_type.dtype == CSL_U32) {
+float bytes_to_sample(const unsigned char* bytes, CslDataType data_type) {
+    if (data_type == CSL_S24 || data_type == CSL_S32 ||
+        data_type == CSL_U24 || data_type == CSL_U32) {
         int sample_value = (int32_t)
             (
                 (bytes[3] << 24) | 
@@ -163,44 +163,44 @@ float bytes_to_sample(const unsigned char* bytes, InputDtype data_type) {
                 (bytes[0])
             );
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !data_type.is_signed) {
-            return sample_val_float / data_type.max_size;
+        if (sample_val_float > 0 || !is_signed_type(data_type)) {
+            return sample_val_float / get_max_value(data_type);
         }
         else {
-            return sample_val_float / data_type.min_size;
+            return sample_val_float / get_min_value(data_type);
         }
     }
-    else if (data_type.dtype == CSL_S16 || data_type.dtype == CSL_U16) {
+    else if (data_type == CSL_S16 || data_type == CSL_U16) {
         int sample_value = (int16_t)
             (
                 (bytes[1] << 8) | (bytes[0])
             );
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !data_type.is_signed) {
-            return sample_val_float / data_type.max_size;
+        if (sample_val_float > 0 || !is_signed_type(data_type)) {
+            return sample_val_float / get_max_value(data_type);
         }
         else {
-            return sample_val_float / data_type.min_size;
+            return sample_val_float / get_min_value(data_type);
         }
     }
-    else if (data_type.dtype == CSL_S8 || data_type.dtype == CSL_U8) {
+    else if (data_type == CSL_S8 || data_type == CSL_U8) {
         int sample_value = (int8_t)bytes[0];
         float sample_val_float = (float)sample_value;
-        if (sample_val_float > 0 || !data_type.is_signed) {
-            return sample_val_float / data_type.max_size;
+        if (sample_val_float > 0 || !is_signed_type(data_type)) {
+            return sample_val_float / get_max_value(data_type);
         }
         else {
-            return sample_val_float / data_type.min_size;
+            return sample_val_float / get_min_value(data_type);
         }
     }
 }
 
-int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t byte_len, size_t input_max_samples, CSL_DTYPE data_type) {
-    int num_samples = byte_len / get_bytes_in_buffer(data_type);
+int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type) {
+    int num_samples = num_bytes / get_bytes_in_buffer(data_type);
     if (num_samples > input_max_samples) num_samples = input_max_samples;
     int i;
     for (i = 0; i < num_samples; i++) {
-        float sample = bytes_to_sample(byte_buffer + (i * get_bytes_in_buffer(data_type)), get_dtype(data_type));
+        float sample = bytes_to_sample(byte_buffer + (i * get_bytes_in_buffer(data_type)), data_type);
         float_buffer[i] = sample;
     }
     return i;

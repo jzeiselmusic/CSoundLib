@@ -7,8 +7,8 @@ static inline void dummy_callback(
     int trackId,
     unsigned char *buffer, 
     size_t length, 
-    CSL_DTYPE data_type, 
-    CSL_SR sample_rate, 
+    CslDataType data_type, 
+    CslSampleRate sample_rate, 
     size_t num_channels
 ) {};
 

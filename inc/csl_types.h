@@ -9,7 +9,7 @@
 
 
 typedef struct _inputDtype {
-    CSL_DTYPE dtype;
+    CslDataType dtype;
     enum SoundIoFormat format;
     uint8_t bit_depth;
     uint8_t bytes_in_buffer;
@@ -46,14 +46,14 @@ typedef struct _inputDtype {
 #define CSL_BYTES_IN_BUFFER_24        4
 #define CSL_BYTES_IN_BUFFER_32        4
 
-InputDtype get_dtype(CSL_DTYPE in);
-size_t get_bytes_in_sample(CSL_DTYPE in);
-size_t get_bytes_in_buffer(CSL_DTYPE in);
-uint8_t get_bit_depth(CSL_DTYPE in);
-int32_t get_max_value(CSL_DTYPE in);
-int32_t get_min_value(CSL_DTYPE in);
-bool is_signed_type(CSL_DTYPE in);
-int get_sample_rate(CSL_SR in);
+InputDtype get_dtype(CslDataType in);
+size_t get_bytes_in_sample(CslDataType in);
+size_t get_bytes_in_buffer(CslDataType in);
+uint8_t get_bit_depth(CslDataType in);
+int32_t get_max_value(CslDataType in);
+int32_t get_min_value(CslDataType in);
+bool is_signed_type(CslDataType in);
+int get_sample_rate(CslSampleRate in);
 
 InputDtype CSL_U8_t;
 InputDtype CSL_S8_t;

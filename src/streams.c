@@ -33,6 +33,9 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
     /* gets called repeatedly every time audio data is available to be read on this particular input device */
     /* every input stream started gets a read callback associated with it that gets repeatedly called */
     /* when a device sends data, it interleaves the data based on how many channels there are */
+    if (!csoundlib_state->input_stream_started) {
+        return;
+    }
     int device_index = -1;
     while(csoundlib_state->input_stream_written == true) {
         /* wait until output is done to start reading again */
@@ -107,6 +110,9 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
 
     /* this function takes the data in the mix buffer and places it into the stream associated with the output device */
     /* we then will increment the read ptr because we read the data placed in by the input streams */
+    if (!csoundlib_state->output_stream_started) {
+        return;
+    }
     int frames_left;
     int frame_count;
     int err;
@@ -308,7 +314,6 @@ int soundlib_stop_output_stream() {
     if (csoundlib_state->output_stream_started) {
         csoundlib_state->output_stream_started = false;
         csoundlib_state->output_stream_initialized = false;
-        soundio_outstream_pause(csoundlib_state->output_stream, true);
         soundio_outstream_destroy(csoundlib_state->output_stream);
     }
     return SoundIoErrorNone;
