@@ -135,14 +135,24 @@ size_t get_bytes_in_sample(CslDataType in) {
     }
 }
 
-size_t get_bytes_in_buffer(CslDataType in) {
+// if reading a wav file buffer, 24 bit depth is stored in 3 bytes
+// if reading an audio stream from a device, 24 bits are stored in 4 bytes
+size_t get_bytes_in_buffer(CslDataType in, bool audio_file) {
     switch(in) {
         case CSL_U8: return CSL_BYTES_IN_BUFFER_8; break;
         case CSL_S8: return CSL_BYTES_IN_BUFFER_8; break;
         case CSL_U16: return CSL_BYTES_IN_BUFFER_16; break;
         case CSL_S16: return CSL_BYTES_IN_BUFFER_16; break;
-        case CSL_U24: return CSL_BYTES_IN_BUFFER_24; break;
-        case CSL_S24: return CSL_BYTES_IN_BUFFER_24; break;
+        case CSL_U24: {
+            if (audio_file) return 3;
+            else return CSL_BYTES_IN_BUFFER_24; 
+            break;
+        }
+        case CSL_S24: {
+            if (audio_file) return 3;
+            else return CSL_BYTES_IN_BUFFER_24; 
+            break;
+        }
         case CSL_U32: return CSL_BYTES_IN_BUFFER_32; break;
         case CSL_S32: return CSL_BYTES_IN_BUFFER_32; break;
         default: return 0;

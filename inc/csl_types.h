@@ -47,13 +47,6 @@ typedef struct _inputDtype {
 #define CSL_BYTES_IN_BUFFER_32        4
 
 InputDtype get_dtype(CslDataType in);
-size_t get_bytes_in_sample(CslDataType in);
-size_t get_bytes_in_buffer(CslDataType in);
-uint8_t get_bit_depth(CslDataType in);
-int32_t get_max_value(CslDataType in);
-int32_t get_min_value(CslDataType in);
-bool is_signed_type(CslDataType in);
-int get_sample_rate(CslSampleRate in);
 
 InputDtype CSL_U8_t;
 InputDtype CSL_S8_t;

@@ -40,7 +40,7 @@ float envelope_follower(float input, float attack, float release, float prev_env
 
 void add_and_scale_audio(const uint8_t *source, uint8_t *destination, float volume, int num_samples) {
     CslDataType dtype = csoundlib_state->input_dtype.dtype;
-    uint8_t bytes_in_buffer = get_bytes_in_buffer(dtype);
+    uint8_t bytes_in_buffer = get_bytes_in_buffer(dtype, false);
     uint8_t bytes_in_sample = get_bytes_in_sample(dtype);
     for (int i = 0; i < num_samples; i++) {
         int32_t src_sample = 0;
@@ -93,7 +93,7 @@ void add_and_scale_audio(const uint8_t *source, uint8_t *destination, float volu
 
 void scale_audio(uint8_t *source, float volume, int num_samples) {
     CslDataType dtype = csoundlib_state->input_dtype.dtype;
-    uint8_t bytes_in_buffer = get_bytes_in_buffer(dtype);
+    uint8_t bytes_in_buffer = get_bytes_in_buffer(dtype, false);
     uint8_t bytes_in_sample = get_bytes_in_sample(dtype);
     for (int i = 0; i < num_samples; i++) {
         int32_t src_sample = 0;
@@ -263,18 +263,7 @@ float bytes_to_sample(const unsigned char* bytes, CslDataType data_type) {
 }
 
 int byte_buffer_to_float_buffer(const unsigned char* byte_buffer, float* float_buffer, size_t num_bytes, size_t input_max_samples, CslDataType data_type, bool audio_file) {
-    int bytes_in_buffer;
-    if (audio_file) {
-        if (data_type == CSL_S24 || data_type == CSL_U24) {
-            bytes_in_buffer = 3;
-        }
-        else {
-            bytes_in_buffer = get_bytes_in_buffer(data_type);
-        }
-    }
-    else {
-        bytes_in_buffer = get_bytes_in_buffer(data_type);
-    }
+    int bytes_in_buffer = get_bytes_in_buffer(data_type, audio_file);
     int num_samples = num_bytes / bytes_in_buffer;
     if (num_samples > input_max_samples) num_samples = input_max_samples;
     int i;

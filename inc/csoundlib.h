@@ -579,6 +579,13 @@ void open_mp3_file(const char *path, CslFileInfo* info);
 
 float bytes_to_sample_audio_file(const unsigned char* bytes, CslDataType data_type);
 float bytes_to_sample(const unsigned char* bytes, CslDataType data_type);
+size_t get_bytes_in_sample(CslDataType in);
+size_t get_bytes_in_buffer(CslDataType in, bool audio_file);
+uint8_t get_bit_depth(CslDataType in);
+int32_t get_max_value(CslDataType in);
+int32_t get_min_value(CslDataType in);
+bool is_signed_type(CslDataType in);
+int get_sample_rate(CslSampleRate in);
 
 /**
  * @brief Turn a buffer of bytes into a buffer of floats
