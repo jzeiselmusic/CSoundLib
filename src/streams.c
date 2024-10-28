@@ -86,7 +86,14 @@ static void _inputStreamReadCallback(struct SoundIoInStream *instream, int frame
                     struct SoundIoRingBuffer* ring_buffer = csoundlib_state->input_channel_buffers[ch];
                     char* write_ptr = soundio_ring_buffer_write_ptr(ring_buffer);
                     char* bytes = areas[ch].ptr;
-                    memcpy(write_ptr, bytes, instream->bytes_per_sample);
+                    // if user is reading from an audio file, fill input stream with 0
+                    // so that we do not pick up microphone stream
+                    if (csoundlib_state->stream_type == CSL_AUDIO_FILE) {
+                        memset(write_ptr, 0, instream->bytes_per_sample);
+                    }
+                    else {
+                        memcpy(write_ptr, bytes, instream->bytes_per_sample);
+                    }
                     areas[ch].ptr += areas[ch].step;
                     soundio_ring_buffer_advance_write_ptr(ring_buffer, instream->bytes_per_sample);
                 }
@@ -162,25 +169,26 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
 
     /* now copy input buffer to output scaled by volume */
     /* note: THIS IS WHERE VOLUME SCALING HAPPENS */
-    _copyInputBuffersToOutputBuffers();
+    if (csoundlib_state->stream_type == CSL_REALTIME) {
+        _copyInputBuffersToOutputBuffers();
+    }
 
     /* send output buffer to effect units */
     _processMasterEffects();
 
     _processMasterOutputVolume();
 
-    /* give user the mixed output buffer */
-    _processMasterOutputReadyCallback();
-
-    /* set master output rms level */
-    csoundlib_state->current_rms_ouput = calculate_rms_level(csoundlib_state->mixed_output_buffer, frame_count_max * outstream->bytes_per_frame);
-
-    /* now place data from mixed output buffer into output stream */
     int read_count_samples = min_int(frame_count_max, max_fill_samples);
     /* handle case of no input streams */
     if (read_count_samples == 0) read_count_samples = frame_count_min;
     /* there is data to be read to output */
     frames_left = read_count_samples;
+
+    /* give user the mixed output buffer */
+    _processMasterOutputReadyCallback(frames_left * csoundlib_state->num_channels_audio_file * csoundlib_state->input_dtype.bytes_in_buffer);
+
+    /* set master output rms level */
+    csoundlib_state->current_rms_ouput = calculate_rms_level(csoundlib_state->mixed_output_buffer, frame_count_max * outstream->bytes_per_frame);
     unsigned char* mixed_read_ptr = csoundlib_state->mixed_output_buffer;
     while (frames_left > 0) {
         int frame_count = frames_left;
@@ -190,12 +198,49 @@ static void _outputStreamWriteCallback(struct SoundIoOutStream *outstream, int f
         }
         if (frame_count <= 0)
             break;
-        for (int frame = 0; frame < frame_count; frame += 1) {
-            for (int ch = 0; ch < outstream->layout.channel_count; ch += 1) {
-                memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
-                areas[ch].ptr += areas[ch].step;
+        /* outstream->layout.channel_count corresponds to num channels of output device */
+        switch (csoundlib_state->stream_type) {
+            case CSL_REALTIME: {
+                if (csoundlib_state->num_input_channels == 1 && csoundlib_state->num_output_channels == 2) {
+                    for (int frame = 0; frame < frame_count; frame += 1) {
+                        // duplicated for each channel 1->2
+                        for (int ch = 0; ch < outstream->layout.channel_count; ch += 1) {
+                            memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
+                            areas[ch].ptr += areas[ch].step;
+                        }
+                        mixed_read_ptr += outstream->bytes_per_sample;
+                    }
+                }
+                else {
+                    printf("error: have not implemented multi-input-channel devices for realtime\n");
+                }
+                break;
             }
-            mixed_read_ptr += outstream->bytes_per_sample;
+            case CSL_AUDIO_FILE: {
+                if (csoundlib_state->num_channels_audio_file == 1 && csoundlib_state->num_output_channels == 2) {
+                    for (int frame = 0; frame < frame_count; frame += 1) {
+                        // duplicated for each channel 1->2
+                        for (int ch = 0; ch < outstream->layout.channel_count; ch += 1) {
+                            memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
+                            areas[ch].ptr += areas[ch].step;
+                        }
+                        mixed_read_ptr += outstream->bytes_per_sample;
+                    }
+                }
+                else if (csoundlib_state->num_channels_audio_file == 2 && csoundlib_state->num_output_channels == 2) {
+                    for (int frame = 0; frame < frame_count; frame += 1) {
+                        for (int ch = 0; ch < outstream->layout.channel_count; ch += 1) {
+                            memcpy(areas[ch].ptr, mixed_read_ptr, outstream->bytes_per_sample);
+                            areas[ch].ptr += areas->step;
+                            mixed_read_ptr += outstream->bytes_per_sample;
+                        }
+                    }
+                }
+                else {
+                    printf("error: have not implemented this channel setting for audio file support\n");
+                }
+                break;
+            }
         }
         if ((err = soundio_outstream_end_write(outstream))) {
             printf("outstream end write error \n");
@@ -401,6 +446,13 @@ static void _processAudioEffects() {
 
 static void _processInputReadyCallback() {
     hti it = ht_iterator(csoundlib_state->track_hash_table);
+    uint8_t input_channels;
+    if (csoundlib_state->stream_type == CSL_AUDIO_FILE) {
+        input_channels = csoundlib_state->num_channels_audio_file;
+    }
+    else {
+        input_channels = csoundlib_state->num_input_channels;
+    }
     while (ht_next(&it)) {
         trackObject* track_p = (trackObject*)it.value;
         track_p->input_ready_callback(
@@ -409,7 +461,7 @@ static void _processInputReadyCallback() {
             track_p->input_buffer.write_bytes,
             csoundlib_state->input_dtype.dtype,
             csoundlib_state->sample_rate,
-            csoundlib_state->num_input_channels
+            input_channels
         );
     }
 }
@@ -429,10 +481,17 @@ static void _processOutputReadyCallback() {
     }
 }
 
-static void _processMasterOutputReadyCallback() {
+static void _processMasterOutputReadyCallback(size_t num_bytes) {
+    size_t bytes;
+    if (csoundlib_state->stream_type == CSL_AUDIO_FILE) {
+        bytes = num_bytes;
+    }
+    else {
+        bytes = csoundlib_state->mixed_output_buffer_len;
+    }
     csoundlib_state->output_callback(
         csoundlib_state->mixed_output_buffer,
-        csoundlib_state->mixed_output_buffer_len,
+        bytes,
         csoundlib_state->input_dtype.dtype,
         csoundlib_state->sample_rate,
         csoundlib_state->num_input_channels

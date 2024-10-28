@@ -44,11 +44,16 @@ static void _deallocateAllMemory() {
     free(csoundlib_state);
 }
 
-int soundlib_start_session(CslSampleRate sample_rate, CslDataType data_type) {
+int soundlib_start_session(
+    CslSampleRate sample_rate, 
+    CslDataType data_type, 
+    CslStreamType stream_type,
+    float software_latency) {
     int err;
     csoundlib_state = malloc( sizeof(audio_state) );
 
     csoundlib_state->sample_rate = sample_rate;
+    csoundlib_state->stream_type = stream_type;
 
     if ((err = _setGlobalInputSampleRate(sample_rate)) != SoundIoErrorNone) {
         return err;
@@ -84,6 +89,7 @@ int soundlib_start_session(CslSampleRate sample_rate, CslDataType data_type) {
         csoundlib_state->master_effects.master_effect_list = effects;
         csoundlib_state->master_effects.num_effects = 0;
         csoundlib_state->output_callback = &master_dummy_callback;
+        csoundlib_state->num_channels_audio_file = 2;
         int backend_err = _connectToBackend();
         int input_dev_err = soundlib_load_input_devices();
         int output_dev_err = soundlib_load_output_devices();
@@ -96,6 +102,18 @@ int soundlib_start_session(CslSampleRate sample_rate, CslDataType data_type) {
         }
         if (output_dev_err != SoundIoErrorNone) {
             return CSLErrorLoadingOutputDevices;
+        }
+
+        int ind = soundlib_get_default_input_device_index();
+        int oind = soundlib_get_default_output_device_index();
+
+        err = soundlib_start_input_stream(ind, software_latency);
+        if (err != SoundIoErrorNone) {
+            return err;
+        }
+        err = soundlib_start_output_stream(oind, software_latency);
+        if (err !=SoundIoErrorNone) {
+            return err;
         }
         return SoundIoErrorNone;
     }
@@ -208,5 +226,9 @@ static int _setGlobalOutputSampleRate(CslSampleRate sample_rate) {
     if (status != noErr) return CSLErrorSettingSampleRate;
 
     return SoundIoErrorNone;
+}
+
+void soundlib_set_num_channels_audio_file(uint8_t channels) {
+    csoundlib_state->num_channels_audio_file = channels;
 }
 

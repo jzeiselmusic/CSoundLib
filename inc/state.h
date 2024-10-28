@@ -12,6 +12,7 @@ typedef struct _audioState {
     struct SoundIo* soundio;
     CslSampleRate sample_rate; 
     InputDtype input_dtype;
+    CslStreamType stream_type;
     float master_volume; // 0.0 -> 1.0 (parity)
 
     /* initialization */
@@ -49,6 +50,8 @@ typedef struct _audioState {
     /* solo and mute */
     uint16_t tracks_solod;
     bool solo_engaged;
+
+    uint8_t num_channels_audio_file;
 
 } audio_state;
 

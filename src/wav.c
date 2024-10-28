@@ -59,6 +59,8 @@ int open_wav_file(const char* path, CslFileInfo* info) {
     // found data. now read into buffer
     fread(info->data, sizeof(unsigned char), header.data_bytes, fp);
 
+    fclose(fp);
+
     if (header.sample_rate == 44100) {
         info->sample_rate = CSL_SR44100;
     }

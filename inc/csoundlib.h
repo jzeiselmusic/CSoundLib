@@ -117,12 +117,24 @@ typedef enum {
 /**
  * @enum CslFileType
  * @brief file types supported by the library.
- *
  */
 typedef enum {
     CSL_WAV,
     CSL_MP3
 } CslFileType;
+
+/**
+ * @enum CslStreamType
+ * @brief type of audio session.
+ *      REALTIME session takes audio input from audio device and streams to output 
+ *      device in realtime.
+ *      AUDIO_FILE session relies on the user to send audio file data to an input track 
+ *      and that audio data will be output whenever present to the output device
+ */
+typedef enum {
+    CSL_REALTIME,
+    CSL_AUDIO_FILE,
+} CslStreamType;
 
 /**
  * @typedef TrackAudioAvailableCallback
@@ -212,7 +224,11 @@ typedef struct {
  * @param data_type The data type for audio processing (from CslDataType).
  * @return SoundIoErrorNone (0) on success, non-zero on failure.
  */
-int soundlib_start_session(CslSampleRate sample_rate, CslDataType data_type);
+int soundlib_start_session(
+    CslSampleRate sample_rate, 
+    CslDataType data_type, 
+    CslStreamType stream_type,
+    float software_latency);
 
 /**
  * @brief Stops and cleans up the current sound session.
@@ -312,6 +328,8 @@ int soundlib_choose_input_channel(int trackId, int channel_index);
  * @return track RMS value between 0 and 1
  */
 float soundlib_get_track_input_rms(int trackId);
+
+void soundlib_set_num_channels_audio_file(uint8_t channels);
 
 /**
  * @brief Return current track output stage RMS 
