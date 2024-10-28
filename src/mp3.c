@@ -50,6 +50,7 @@ void open_mp3_file(const char *path, CslFileInfo* info) {
         printf("context was not allocated\n");
         return;
     }
+
     AVChannelLayout stereo_layout = (AVChannelLayout)AV_CHANNEL_LAYOUT_STEREO;
     AVChannelLayout in_layout = (codec_ctx->ch_layout);
     av_opt_set_chlayout(swr_ctx, "in_chlayout", &in_layout, 0);
@@ -57,7 +58,7 @@ void open_mp3_file(const char *path, CslFileInfo* info) {
     av_opt_set_int(swr_ctx, "in_sample_rate", codec_ctx->sample_rate, 0);
     av_opt_set_int(swr_ctx, "out_sample_rate", 44100, 0);
     av_opt_set_sample_fmt(swr_ctx, "in_sample_fmt", codec_ctx->sample_fmt, 0);
-    av_opt_set_sample_fmt(swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_S32, 0);
+    av_opt_set_sample_fmt(swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
     int ret = swr_init(swr_ctx);
     if (ret < 0) {
         printf("context was not initialized\n");
@@ -78,8 +79,8 @@ void open_mp3_file(const char *path, CslFileInfo* info) {
                     input_buffer_size = av_samples_alloc(&input_buffer, NULL, 2, input_samples, AV_SAMPLE_FMT_S32, 0);
                     int converted_samples = swr_convert(swr_ctx, &input_buffer, input_samples, 
                                                         (const uint8_t **)frame->extended_data, frame->nb_samples);
-                    memcpy(info->data + (total_frames * 2 * 4), input_buffer, converted_samples * 4 * 2);
-                    total_frames += (converted_samples*2/ 4); // 2 channels 
+                    memcpy(info->data + (total_frames * 2 * 2), input_buffer, converted_samples * 2 * 2);
+                    total_frames += (converted_samples* 2 / 2); // 2 channels 
                     av_freep(&input_buffer);
                 }
             }
@@ -92,7 +93,7 @@ void open_mp3_file(const char *path, CslFileInfo* info) {
     avcodec_free_context(&codec_ctx);
     avformat_close_input(&format_ctx);
 
-    info->data_type = CSL_S32;
+    info->data_type = CSL_S16;
     info->sample_rate = CSL_SR44100;
     info->path = path;
     info->num_channels = 2;
