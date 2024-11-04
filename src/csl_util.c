@@ -159,23 +159,21 @@ float bytes_to_sample_audio_file(const unsigned char* bytes, CslDataType data_ty
             (bytes[2] << 16) | 
             (bytes[1] << 8)  | 
             (bytes[0]);
-
         // Perform sign extension for signed 24-bit data
         if (data_type == CSL_S24 && (sample_value & 0x800000)) { 
             sample_value |= 0xFF000000; // Sign extend to 32 bits if negative
         }
-
         // Convert to float and scale
         float sample_val_float = (float)sample_value;
         float max_value = get_max_value(data_type);
         float min_value = get_min_value(data_type);
 
         if (!is_signed_type(data_type)) {
-            return sample_val_float / max_value; // Unsigned: scale by max
+            return sample_val_float / (float)max_value; // Unsigned: scale by max
         } else if (sample_val_float >= 0) {
-            return sample_val_float / max_value; // Signed positive
+            return sample_val_float / (float)max_value; // Signed positive
         } else {
-            return sample_val_float / min_value; // Signed negative
+            return sample_val_float / (float)(abs(min_value)); // Signed negative
         }
     }
     if (data_type == CSL_S32 || data_type == CSL_U32) {
@@ -188,10 +186,10 @@ float bytes_to_sample_audio_file(const unsigned char* bytes, CslDataType data_ty
             );
         float sample_val_float = (float)sample_value;
         if (sample_val_float > 0 || !is_signed_type(data_type)) {
-            return sample_val_float / get_max_value(data_type);
+            return sample_val_float / (float)get_max_value(data_type);
         }
         else {
-            return sample_val_float / get_min_value(data_type);
+            return sample_val_float / (float)abs(get_min_value(data_type));
         }
     }
     else if (data_type == CSL_S16 || data_type == CSL_U16) {
@@ -201,20 +199,20 @@ float bytes_to_sample_audio_file(const unsigned char* bytes, CslDataType data_ty
             );
         float sample_val_float = (float)sample_value;
         if (sample_val_float > 0 || !is_signed_type(data_type)) {
-            return sample_val_float / get_max_value(data_type);
+            return sample_val_float / (float)get_max_value(data_type);
         }
         else {
-            return sample_val_float / get_min_value(data_type);
+            return sample_val_float / (float)abs(get_min_value(data_type));
         }
     }
     else if (data_type == CSL_S8 || data_type == CSL_U8) {
         int sample_value = (int8_t)bytes[0];
         float sample_val_float = (float)sample_value;
         if (sample_val_float > 0 || !is_signed_type(data_type)) {
-            return sample_val_float / get_max_value(data_type);
+            return sample_val_float / (float)get_max_value(data_type);
         }
         else {
-            return sample_val_float / get_min_value(data_type);
+            return sample_val_float / (float)abs(get_min_value(data_type));
         }
     }
 }
@@ -231,10 +229,10 @@ float bytes_to_sample(const unsigned char* bytes, CslDataType data_type) {
             );
         float sample_val_float = (float)sample_value;
         if (sample_val_float > 0 || !is_signed_type(data_type)) {
-            return sample_val_float / get_max_value(data_type);
+            return sample_val_float / (float)get_max_value(data_type);
         }
         else {
-            return sample_val_float / get_min_value(data_type);
+            return sample_val_float / (float)abs(get_min_value(data_type));
         }
     }
     else if (data_type == CSL_S16 || data_type == CSL_U16) {
@@ -244,20 +242,20 @@ float bytes_to_sample(const unsigned char* bytes, CslDataType data_type) {
             );
         float sample_val_float = (float)sample_value;
         if (sample_val_float > 0 || !is_signed_type(data_type)) {
-            return sample_val_float / get_max_value(data_type);
+            return sample_val_float / (float)get_max_value(data_type);
         }
         else {
-            return sample_val_float / get_min_value(data_type);
+            return sample_val_float / (float)abs(get_min_value(data_type));
         }
     }
     else if (data_type == CSL_S8 || data_type == CSL_U8) {
         int sample_value = (int8_t)bytes[0];
         float sample_val_float = (float)sample_value;
         if (sample_val_float > 0 || !is_signed_type(data_type)) {
-            return sample_val_float / get_max_value(data_type);
+            return sample_val_float / (float)get_max_value(data_type);
         }
         else {
-            return sample_val_float / get_min_value(data_type);
+            return sample_val_float / (float)abs(get_min_value(data_type));
         }
     }
 }
